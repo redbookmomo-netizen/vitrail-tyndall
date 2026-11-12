@@ -1,0 +1,2339 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>澄光圣堂 · 丁达尔彩窗纯光空间</title>
+<meta name="description" content="以丁达尔效应与哥特古法彩窗为概念的纯光照三维空间：无光之处皆归虚无，倾斜手机由陀螺仪转动日光角度，以彩色体积光束与焦散光斑显化立体圣堂。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: hsla(38, 28%, 93%, 0.92);
+    --ink-soft: hsla(36, 18%, 82%, 0.62);
+    --ink-dim: hsla(35, 14%, 74%, 0.40);
+    --hair: hsla(38, 24%, 90%, 0.15);
+    --hair-strong: hsla(38, 30%, 92%, 0.28);
+    --glass-bg: hsla(24, 12%, 8%, 0.46);
+    --gold: hsl(39, 78%, 78%);
+    --serif: "Cormorant Garamond", "Iowan Old Style", "Songti SC", "STSong", "Noto Serif SC", "Source Han Serif SC", Georgia, serif;
+  }
+
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: #000000;
+    overflow: hidden;
+    overscroll-behavior: none;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  body {
+    font-family: var(--serif);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  #glCanvas {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    display: block;
+    background: #000000;
+  }
+
+  /* ---------- Intro Veil ---------- */
+  #introVeil {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: calc(env(safe-area-inset-top) + 28px) 28px calc(env(safe-area-inset-bottom) + 28px);
+    text-align: center;
+    background: radial-gradient(95% 75% at 50% 50%, rgba(0, 0, 0, 0.52) 0%, rgba(0, 0, 0, 0.76) 65%, rgba(0, 0, 0, 0.94) 100%);
+    transition: opacity 1.5s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 1.5s;
+  }
+
+  #introVeil.dismissed {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .latin-epigraph {
+    font-size: 11px;
+    letter-spacing: 0.46em;
+    padding-left: 0.46em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 400;
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.95);
+  }
+
+  #mainTitle {
+    margin: 20px 0 12px;
+    font-weight: 300;
+    font-size: clamp(38px, 10.5vw, 66px);
+    line-height: 1.08;
+    letter-spacing: 0.30em;
+    padding-left: 0.30em;
+    color: var(--ink);
+    text-shadow: 0 2px 32px rgba(0, 0, 0, 0.95), 0 0 14px rgba(0, 0, 0, 0.85);
+  }
+
+  .subtitle {
+    margin: 0;
+    font-size: clamp(13px, 3.5vw, 15px);
+    line-height: 1.95;
+    letter-spacing: 0.22em;
+    padding-left: 0.22em;
+    color: var(--ink-soft);
+    max-width: 340px;
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.95);
+  }
+
+  .plumb-line {
+    width: 1px;
+    height: 44px;
+    margin: 26px auto 24px;
+    background: linear-gradient(to bottom, transparent, var(--hair-strong), transparent);
+  }
+
+  #enterBtn {
+    appearance: none;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 400;
+    letter-spacing: 0.42em;
+    padding: 14px 32px 14px calc(32px + 0.42em);
+    color: var(--ink);
+    background: rgba(10, 10, 12, 0.56);
+    border: 1px solid var(--hair-strong);
+    border-radius: 999px;
+    cursor: pointer;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    transition: background 0.35s ease, border-color 0.35s ease, transform 0.25s ease;
+  }
+
+  #enterBtn:hover {
+    background: rgba(24, 22, 26, 0.72);
+    border-color: hsla(38, 35%, 92%, 0.45);
+  }
+
+  #enterBtn:active {
+    transform: scale(0.965);
+  }
+
+  .intro-caption {
+    margin-top: 20px;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    padding-left: 0.16em;
+    color: var(--ink-soft);
+    line-height: 1.7;
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95);
+  }
+
+  /* ---------- Floating Toast Hint ---------- */
+  #toastHint {
+    position: fixed;
+    left: 50%;
+    top: calc(env(safe-area-inset-top) + 22px);
+    transform: translateX(-50%) translateY(-4px);
+    z-index: 6;
+    font-size: 12.5px;
+    letter-spacing: 0.28em;
+    padding: 7px 16px 7px calc(16px + 0.28em);
+    border-radius: 999px;
+    color: var(--ink);
+    background: rgba(8, 8, 10, 0.52);
+    border: 1px solid var(--hair);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  #toastHint.visible {
+    opacity: 0.92;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ---------- Bottom Minimal Astrolabe HUD ---------- */
+  #hudBar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 18px calc(env(safe-area-inset-right) + 16px) calc(env(safe-area-inset-bottom) + 14px) calc(env(safe-area-inset-left) + 16px);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0.24) 58%, rgba(0, 0, 0, 0) 100%);
+    opacity: 0;
+    transform: translateY(10px);
+    pointer-events: none;
+    transition: opacity 0.9s ease, transform 0.9s ease;
+  }
+
+  #hudBar.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  #hudBar.immersed {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  .astrolabe-group {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  #sunDial {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+  }
+
+  #sunDial .dial-outer {
+    fill: rgba(255, 255, 255, 0.02);
+    stroke: var(--hair-strong);
+    stroke-width: 1;
+  }
+
+  #sunDial .dial-inner {
+    fill: none;
+    stroke: var(--hair);
+    stroke-width: 0.85;
+    stroke-dasharray: 2 2;
+  }
+
+  #sunDial .dial-axis {
+    stroke: var(--hair);
+    stroke-width: 0.8;
+  }
+
+  #sunRayLine {
+    stroke: hsla(39, 75%, 78%, 0.45);
+    stroke-width: 1.1;
+  }
+
+  #sunOrb {
+    fill: var(--gold);
+  }
+
+  .telemetry {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  #sensorState {
+    font-size: 10.5px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+
+  #angleReadout {
+    font-size: 13.5px;
+    letter-spacing: 0.10em;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .hud-controls {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-shrink: 0;
+  }
+
+  .hud-btn {
+    appearance: none;
+    font-family: inherit;
+    font-size: 12.5px;
+    letter-spacing: 0.18em;
+    padding: 8px 12px 8px calc(12px + 0.18em);
+    color: var(--ink);
+    background: var(--glass-bg);
+    border: 1px solid var(--hair);
+    border-radius: 999px;
+    cursor: pointer;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    transition: background 0.25s ease, border-color 0.25s ease, transform 0.2s ease, opacity 0.25s ease;
+    white-space: nowrap;
+  }
+
+  .hud-btn:hover {
+    background: rgba(255, 250, 240, 0.10);
+    border-color: var(--hair-strong);
+  }
+
+  .hud-btn:active {
+    transform: scale(0.94);
+  }
+
+  .hud-btn.muted {
+    color: var(--ink-dim);
+  }
+
+  #fallbackNotice {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    text-align: center;
+    background: #000;
+    color: var(--ink-soft);
+    letter-spacing: 0.16em;
+    line-height: 1.8;
+  }
+
+  #fallbackNotice[hidden] {
+    display: none;
+  }
+
+  @media (max-width: 390px) {
+    .hud-btn {
+      font-size: 11.5px;
+      padding: 7px 9px 7px calc(9px + 0.14em);
+      letter-spacing: 0.12em;
+    }
+    #angleReadout {
+      font-size: 12.5px;
+    }
+  }
+</style>
+</head>
+<body>
+<main>
+  <canvas id="glCanvas" aria-label="由哥特彩绘花窗丁达尔光束与焦散光斑显化的纯光照三维圣堂场景"></canvas>
+
+  <section id="introVeil">
+    <div class="latin-epigraph">Lux Sola Spatium Fingit</div>
+    <h1 id="mainTitle">澄光圣堂</h1>
+    <p class="subtitle">丁达尔效应 × 古法吹制彩窗<br>无光之处皆归虚无，唯光所及方显空间</p>
+    <div class="plumb-line" aria-hidden="true"></div>
+    <button id="enterBtn" type="button">步入光中</button>
+    <div class="intro-caption" id="introCaption">倾斜手机，令穿过彩窗的日光在黑暗圣堂中流转<br>双击画面可隐去界面纯粹观光</div>
+  </section>
+
+  <div id="toastHint" role="status" aria-live="polite">倾斜手机 · 转动穿过花窗的日光</div>
+
+  <footer id="hudBar">
+    <div class="astrolabe-group">
+      <svg id="sunDial" viewBox="0 0 44 44" aria-hidden="true">
+        <circle class="dial-outer" cx="22" cy="22" r="19.5"/>
+        <circle class="dial-inner" cx="22" cy="22" r="10.5"/>
+        <line class="dial-axis" x1="22" y1="3" x2="22" y2="9"/>
+        <line class="dial-axis" x1="22" y1="35" x2="22" y2="41"/>
+        <line class="dial-axis" x1="3" y1="22" x2="9" y2="22"/>
+        <line class="dial-axis" x1="35" y1="22" x2="41" y2="22"/>
+        <line id="sunRayLine" x1="22" y1="22" x2="17" y2="22"/>
+        <circle id="sunOrb" cx="17" cy="22" r="3.1"/>
+      </svg>
+      <div class="telemetry">
+        <span id="sensorState">Gyro · 陀螺仪待命</span>
+        <span id="angleReadout">方位 -34° · 仰角 23°</span>
+      </div>
+    </div>
+    <div class="hud-controls">
+      <button class="hud-btn" id="viewBtn" type="button" title="切换圣堂内观察位置">隅壁</button>
+      <button class="hud-btn" id="calibBtn" type="button" title="将当前握持姿态校准为中心日光">校准</button>
+      <button class="hud-btn" id="audioBtn" type="button" title="开关琉璃圣堂空灵泛音">声韵</button>
+    </div>
+  </footer>
+
+  <div id="fallbackNotice" hidden>当前浏览器未开启 WebGL 支持，无法渲染体积光空间。</div>
+</main>
+
+<script>
+(() => {
+  'use strict';
+
+  const $ = sel => document.querySelector(sel);
+  const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
+
+  const canvas = $('#glCanvas');
+  const glOpts = {
+    antialias: false,
+    alpha: false,
+    depth: false,
+    stencil: false,
+    premultipliedAlpha: false,
+    powerPreference: 'high-performance'
+  };
+
+  let isWebGL2 = true;
+  let gl = canvas.getContext('webgl2', glOpts);
+  if (!gl) {
+    isWebGL2 = false;
+    gl = canvas.getContext('webgl', glOpts) || canvas.getContext('experimental-webgl', glOpts);
+  }
+  if (!gl) {
+    $('#fallbackNotice').hidden = false;
+    return;
+  }
+  const extLod = !isWebGL2 ? gl.getExtension('EXT_shader_texture_lod') : null;
+
+  /* =========================================================================
+     1. PROCEDURAL GOTHIC STAINED GLASS & MOUTH-BLOWN CAUSTIC WAVE ATLAS
+     Directly inspired by Chartres / Sainte-Chapelle & the reference cathedral:
+     - Opalescent periwinkle-sapphire, wisteria-lavender, celadon-turquoise,
+       warm peach-champagne gold, antique rose-ruby & silver-stained grisaille
+     - Twin 5-tier pointed lancets + ruby-gold heart quatrefoil + 12-petal rose
+     - Exact match with shader outerWinSD(q) in meters: W=2.08m, H=6.80m
+     ========================================================================= */
+  function buildStainedGlassTexture() {
+    const W = 512, H = 1024;
+    const c = document.createElement('canvas');
+    c.width = W;
+    c.height = H;
+    const ctx = c.getContext('2d');
+
+    // Pitch-black opaque stone & lead base (0 transmittance)
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, W, H);
+
+    // Coordinate helpers: qx in [-1.04, 1.04], qy in [0, 6.80] (bottom-up)
+    const toX = qx => (qx / 2.08 + 0.5) * W;
+    const toY = qy => (1.0 - qy / 6.80) * H;
+    const sx = m => (m / 2.08) * W;
+    const sy = m => (m / 6.80) * H;
+
+    // Deterministic PRNG for artisanal stained-glass quarries
+    let seed = 13379;
+    const rnd = () => {
+      seed = (seed * 16807) % 2147483647;
+      return (seed - 1) / 2147483646;
+    };
+
+    // Curated luminous cathedral palette (rich Chartres sapphire, amethyst, rose, gold & opalescent accents)
+    const PALETTE = {
+      periwinkle: ['#3258ff', '#4870ff', '#2442eb', '#5d84ff'],
+      sapphire:   ['#1832d6', '#2140eb', '#1326b5'],
+      lavender:   ['#8c62ff', '#a985ff', '#7448f5', '#c2a6ff'],
+      celadon:    ['#48dbd0', '#6cf0e4', '#2ec4ba', '#96f7ec'],
+      peachGold:  ['#ffbe6b', '#ffd694', '#f79c42', '#ffe7ba'],
+      rose:       ['#f56493', '#ff85ad', '#e03468', '#ffa8c5'],
+      ruby:       ['#eb1e47', '#ff3860', '#c91438'],
+      grisaille:  ['#dce8ff', '#fff0d9', '#cfe0ff', '#fae8d4']
+    };
+    const pick = arr => arr[(rnd() * arr.length) | 0];
+
+    // Trace pointed arch path in canvas space: bottom qy0, springing qySpring, half-width hw, radius R
+    function tracePointedArch(qxC, qy0, qySpring, hw, R) {
+      ctx.beginPath();
+      ctx.moveTo(toX(qxC - hw), toY(qy0));
+      ctx.lineTo(toX(qxC - hw), toY(qySpring));
+      const steps = 44;
+      const cc = R - hw;
+      const yApex = Math.sqrt(Math.max(0, R * R - cc * cc));
+      for (let i = 1; i <= steps; i++) {
+        const t = i / steps;
+        const yLocal = t * yApex;
+        const xLocal = Math.sqrt(Math.max(0, R * R - yLocal * yLocal)) - cc;
+        ctx.lineTo(toX(qxC - xLocal), toY(qySpring + yLocal));
+      }
+      for (let i = steps - 1; i >= 0; i--) {
+        const t = i / steps;
+        const yLocal = t * yApex;
+        const xLocal = Math.sqrt(Math.max(0, R * R - yLocal * yLocal)) - cc;
+        ctx.lineTo(toX(qxC + xLocal), toY(qySpring + yLocal));
+      }
+      ctx.lineTo(toX(qxC + hw), toY(qy0));
+      ctx.closePath();
+    }
+
+    // Paint painterly mouth-blown glass mottling inside current clip without bleaching chroma
+    function paintGlassGlow(qxC, qyC, rx, ry, baseHex, centerHex) {
+      const cx = toX(qxC), cy = toY(qyC);
+      const r = Math.max(sx(rx), sy(ry));
+      const g = ctx.createRadialGradient(
+        cx - r * 0.16 * (rnd() - 0.5),
+        cy - r * 0.16 * (rnd() - 0.5),
+        r * 0.05,
+        cx,
+        cy,
+        r * 1.05
+      );
+      g.addColorStop(0, centerHex || baseHex);
+      g.addColorStop(0.55, baseHex);
+      g.addColorStop(1, '#1c246b');
+      ctx.fillStyle = g;
+      ctx.fillRect(cx - r * 1.2, cy - r * 1.2, r * 2.4, r * 2.4);
+    }
+
+    // Draw one of the twin tall lancets (qxC = -0.46 or +0.46)
+    function drawLancet(qxC, sideIdx) {
+      const hw = 0.388, qy0 = 0.13, qySpring = 4.18, R = 1.05;
+      ctx.save();
+      tracePointedArch(qxC, qy0, qySpring, hw, R);
+      ctx.clip();
+
+      // Base luminous diapered diamond quarry field
+      ctx.fillStyle = '#2442eb';
+      ctx.fillRect(toX(qxC - hw), toY(5.2), sx(hw * 2), sy(5.2));
+
+      const dStepX = 0.088, dStepY = 0.115;
+      for (let row = -2; row < 48; row++) {
+        for (let col = -6; col <= 6; col++) {
+          const cx = qxC + (col + (row & 1 ? 0.5 : 0.0)) * dStepX;
+          const cy = qy0 + row * dStepY;
+          const p = rnd();
+          let colHex;
+          if (p < 0.36) colHex = pick(PALETTE.periwinkle);
+          else if (p < 0.56) colHex = pick(PALETTE.sapphire);
+          else if (p < 0.74) colHex = pick(PALETTE.lavender);
+          else if (p < 0.86) colHex = pick(PALETTE.celadon);
+          else if (p < 0.94) colHex = pick(PALETTE.peachGold);
+          else colHex = pick(PALETTE.rose);
+
+          ctx.beginPath();
+          ctx.moveTo(toX(cx), toY(cy + dStepY));
+          ctx.lineTo(toX(cx + dStepX * 0.52), toY(cy));
+          ctx.lineTo(toX(cx), toY(cy - dStepY));
+          ctx.lineTo(toX(cx - dStepX * 0.52), toY(cy));
+          ctx.closePath();
+          ctx.fillStyle = colHex;
+          ctx.fill();
+          ctx.lineWidth = 1.4;
+          ctx.strokeStyle = 'rgba(6, 6, 12, 0.78)';
+          ctx.stroke();
+        }
+      }
+
+      // 5 Narrative & Botanical Medallion Bays (matching the 2x5 bays in the reference window)
+      const bayH = (qySpring - qy0) / 5.0;
+      for (let b = 0; b < 5; b++) {
+        const by0 = qy0 + b * bayH;
+        const byC = by0 + bayH * 0.5;
+
+        // Opalescent aureole / Gothic canopy arch inside each bay
+        ctx.save();
+        tracePointedArch(qxC, by0 + 0.05, by0 + bayH * 0.62, 0.295, 0.62);
+        ctx.clip();
+
+        const mode = (b + sideIdx * 2) % 4;
+        const bgOuter = mode === 0 ? '#e84c7c' : mode === 1 ? '#3658ff' : mode === 2 ? '#8b5cf6' : '#2bc4b8';
+        const bgCenter = mode === 0 ? '#ffd08a' : mode === 1 ? '#82d8ff' : mode === 2 ? '#ffb0cf' : '#ffe8ad';
+        paintGlassGlow(qxC, byC + 0.04, 0.30, bayH * 0.45, bgOuter, bgCenter);
+
+        // Stylized Gothic halo & figure/chalice/fleur-de-lis stained-glass shards
+        const haloY = byC + bayH * 0.13;
+        ctx.beginPath();
+        ctx.ellipse(toX(qxC), toY(haloY), sx(0.115), sy(0.135), 0, 0, Math.PI * 2);
+        ctx.fillStyle = mode % 2 === 0 ? '#ffd27d' : '#ff94b8';
+        ctx.fill();
+        ctx.lineWidth = 2.2;
+        ctx.strokeStyle = '#0a0a10';
+        ctx.stroke();
+
+        // Flowing drapery / botanical shards in jewel & opal tones
+        for (let s = 0; s < 10; s++) {
+          const ang = (s / 10) * Math.PI * 2 + b * 0.7;
+          const ox = qxC + Math.cos(ang) * 0.115 * (0.4 + rnd() * 0.7);
+          const oy = byC - 0.05 + Math.sin(ang) * 0.21 * (0.4 + rnd() * 0.7);
+          ctx.beginPath();
+          ctx.ellipse(
+            toX(ox),
+            toY(oy),
+            sx(0.055 + rnd() * 0.062),
+            sy(0.08 + rnd() * 0.095),
+            ang * 0.5,
+            0,
+            Math.PI * 2
+          );
+          const sp = rnd();
+          ctx.fillStyle = sp < 0.24 ? pick(PALETTE.peachGold)
+            : sp < 0.48 ? pick(PALETTE.periwinkle)
+            : sp < 0.68 ? pick(PALETTE.rose)
+            : sp < 0.84 ? pick(PALETTE.celadon)
+            : sp < 0.93 ? pick(PALETTE.ruby)
+            : pick(PALETTE.grisaille);
+          ctx.fill();
+          ctx.lineWidth = 1.8;
+          ctx.strokeStyle = 'rgba(6, 6, 10, 0.85)';
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        // Outline of inner Gothic canopy + quatrefoil cusp
+        tracePointedArch(qxC, by0 + 0.05, by0 + bayH * 0.62, 0.295, 0.62);
+        ctx.lineWidth = 2.4;
+        ctx.strokeStyle = '#09090e';
+        ctx.stroke();
+
+        // Horizontal iron saddle-bar between bays
+        if (b > 0) {
+          ctx.fillStyle = '#050508';
+          ctx.fillRect(toX(qxC - hw), toY(by0) - 2.2, sx(hw * 2), 4.4);
+        }
+        // Subtle secondary glazing bar mid-bay
+        ctx.fillStyle = 'rgba(6, 6, 10, 0.68)';
+        ctx.fillRect(toX(qxC - hw), toY(byC) - 1.0, sx(hw * 2), 2.0);
+      }
+
+      // Lancet pointed head trefoil crown (above qySpring)
+      const headY = qySpring + 0.34;
+      for (let k = 0; k < 3; k++) {
+        const a = -Math.PI * 0.5 + (k - 1) * 1.05;
+        const lx = qxC + Math.cos(a) * 0.11;
+        const ly = headY - 0.06 + Math.sin(a + Math.PI) * 0.11;
+        ctx.beginPath();
+        ctx.ellipse(toX(lx), toY(ly), sx(0.115), sy(0.13), 0, 0, Math.PI * 2);
+        ctx.fillStyle = k === 1 ? '#ffe6b0' : pick(PALETTE.celadon);
+        ctx.fill();
+        ctx.lineWidth = 2.0;
+        ctx.strokeStyle = '#08080c';
+        ctx.stroke();
+      }
+
+      // Beaded jewelled lancet border along left & right edges
+      const borderW = 0.062;
+      for (const sgn of [-1, 1]) {
+        const bx = qxC + sgn * (hw - borderW * 0.5);
+        ctx.fillStyle = 'rgba(10, 12, 24, 0.88)';
+        ctx.fillRect(toX(bx - borderW * 0.5), toY(qySpring + 0.85), sx(borderW), sy(qySpring + 0.75));
+        for (let j = 0; j < 44; j++) {
+          const jy = qy0 + 0.06 + j * 0.105;
+          ctx.beginPath();
+          ctx.ellipse(toX(bx), toY(jy), sx(0.022), sy(0.034), 0, 0, Math.PI * 2);
+          ctx.fillStyle = j % 3 === 0 ? pick(PALETTE.peachGold)
+            : j % 3 === 1 ? pick(PALETTE.grisaille)
+            : pick(PALETTE.rose);
+          ctx.fill();
+        }
+      }
+
+      // Outer stone rebate shadow of the lancet
+      tracePointedArch(qxC, qy0, qySpring, hw, R);
+      ctx.lineWidth = 5.0;
+      ctx.strokeStyle = '#000000';
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    drawLancet(-0.46, 0);
+    drawLancet(+0.46, 1);
+
+    // Central Glowing Ruby-Gold Heart / Quatrefoil Medallion (echoing the reference photo's upper motif!)
+    {
+      const hx = 0.0, hy = 5.00;
+      ctx.save();
+      ctx.beginPath();
+      const lobes = [
+        [0, 0.11, 0.13],
+        [-0.105, 0.03, 0.125],
+        [+0.105, 0.03, 0.125],
+        [0, -0.09, 0.12]
+      ];
+      for (const [dx, dy, r] of lobes) {
+        ctx.moveTo(toX(hx + dx + r), toY(hy + dy));
+        ctx.ellipse(toX(hx + dx), toY(hy + dy), sx(r), sy(r * 1.12), 0, 0, Math.PI * 2);
+      }
+      ctx.clip();
+
+      paintGlassGlow(hx, hy, 0.25, 0.27, '#e83358', '#ffe8a8');
+      for (let i = 0; i < 8; i++) {
+        const a = (i / 8) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.ellipse(toX(hx + Math.cos(a) * 0.11), toY(hy + Math.sin(a) * 0.12), sx(0.055), sy(0.065), a, 0, Math.PI * 2);
+        ctx.fillStyle = i % 2 === 0 ? '#ff698b' : '#ffd584';
+        ctx.fill();
+        ctx.lineWidth = 1.8;
+        ctx.strokeStyle = '#0a080c';
+        ctx.stroke();
+      }
+      ctx.beginPath();
+      ctx.ellipse(toX(hx), toY(hy + 0.01), sx(0.065), sy(0.075), 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#fff3cf';
+      ctx.fill();
+      ctx.lineWidth = 2.0;
+      ctx.strokeStyle = '#0a080c';
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Flanking Spandrel Trefoil Lights
+    for (const sgn of [-1, 1]) {
+      const tx = sgn * 0.56, ty = 5.26;
+      for (let k = 0; k < 3; k++) {
+        const a = (k / 3) * Math.PI * 2 - Math.PI * 0.5;
+        ctx.beginPath();
+        ctx.ellipse(toX(tx + Math.cos(a) * 0.055), toY(ty + Math.sin(a) * 0.06), sx(0.075), sy(0.082), 0, 0, Math.PI * 2);
+        ctx.fillStyle = k === 0 ? '#9e82ff' : k === 1 ? '#6ee3da' : '#6585ff';
+        ctx.fill();
+        ctx.lineWidth = 2.2;
+        ctx.strokeStyle = '#050508';
+        ctx.stroke();
+      }
+    }
+
+    // Crowning 12-Petal Gothic Rose Oculus (top of tracery, qy = 5.82)
+    {
+      const rx = 0.0, ry = 5.82, rOuter = 0.45;
+      ctx.save();
+      ctx.beginPath();
+      ctx.ellipse(toX(rx), toY(ry), sx(rOuter), sy(rOuter * 1.04), 0, 0, Math.PI * 2);
+      ctx.clip();
+
+      paintGlassGlow(rx, ry, rOuter, rOuter, '#4462f2', '#d6c4ff');
+
+      const petals = 12;
+      for (let i = 0; i < petals; i++) {
+        const a0 = (i / petals) * Math.PI * 2;
+        const aMid = ((i + 0.5) / petals) * Math.PI * 2;
+        const px = rx + Math.cos(aMid) * 0.285;
+        const py = ry + Math.sin(aMid) * 0.295;
+
+        ctx.beginPath();
+        ctx.ellipse(toX(px), toY(py), sx(0.088), sy(0.095), aMid, 0, Math.PI * 2);
+        ctx.fillStyle = i % 3 === 0 ? '#ff88ab' : i % 3 === 1 ? '#ffe0a3' : '#7ae8df';
+        ctx.fill();
+        ctx.lineWidth = 2.0;
+        ctx.strokeStyle = '#07070c';
+        ctx.stroke();
+
+        // Radial stone mullion spoke
+        ctx.beginPath();
+        ctx.moveTo(toX(rx + Math.cos(a0) * 0.11), toY(ry + Math.sin(a0) * 0.115));
+        ctx.lineTo(toX(rx + Math.cos(a0) * rOuter), toY(ry + Math.sin(a0) * rOuter * 1.05));
+        ctx.lineWidth = 3.2;
+        ctx.strokeStyle = '#040407';
+        ctx.stroke();
+      }
+
+      // Inner rose boss
+      ctx.beginPath();
+      ctx.ellipse(toX(rx), toY(ry), sx(0.125), sy(0.13), 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#fff0c4';
+      ctx.fill();
+      ctx.lineWidth = 3.0;
+      ctx.strokeStyle = '#050508';
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.ellipse(toX(rx), toY(ry), sx(0.055), sy(0.058), 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#eb3b62';
+      ctx.fill();
+      ctx.restore();
+
+      ctx.beginPath();
+      ctx.ellipse(toX(rx), toY(ry), sx(rOuter), sy(rOuter * 1.04), 0, 0, Math.PI * 2);
+      ctx.lineWidth = 5.5;
+      ctx.strokeStyle = '#000000';
+      ctx.stroke();
+    }
+
+    // Subtle grisaille patina & hand-painted enamel vine lines across the whole window
+    ctx.save();
+    ctx.globalCompositeOperation = 'source-atop';
+    ctx.strokeStyle = 'rgba(12, 10, 18, 0.22)';
+    ctx.lineWidth = 1.1;
+    for (let i = 0; i < 160; i++) {
+      const vx = (rnd() - 0.5) * 1.85;
+      const vy = 0.2 + rnd() * 6.1;
+      ctx.beginPath();
+      ctx.arc(toX(vx), toY(vy), sx(0.03 + rnd() * 0.05), 0, Math.PI * 1.35);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    const tex = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, c);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    return tex;
+  }
+
+  // Tileable 256x256 antique mouth-blown cylinder-glass surface wave & Laplacian caustic map
+  function buildAntiqueWaveTexture() {
+    const N = 256;
+    const H = new Float32Array(N * N);
+    // Band-limited tileable waves (integer harmonics around torus) -> organic blown-glass ripples
+    const modes = [
+      [2, 1, 0.42, 0.4], [1, 3, 0.36, 1.7], [3, -2, 0.31, 2.9], [-2, 4, 0.26, 0.8],
+      [4, 3, 0.22, 4.1], [5, -1, 0.19, 2.2], [-3, 6, 0.16, 5.0], [6, 4, 0.14, 1.1],
+      [7, -5, 0.11, 3.6], [2, 8, 0.10, 4.8], [9, 3, 0.08, 0.3], [-8, 6, 0.07, 2.6]
+    ];
+    const TAU = Math.PI * 2;
+    for (let y = 0; y < N; y++) {
+      const fy = y / N;
+      for (let x = 0; x < N; x++) {
+        const fx = x / N;
+        let s = 0;
+        for (let m = 0; m < modes.length; m++) {
+          const [kx, ky, amp, ph] = modes[m];
+          s += amp * Math.sin(TAU * (kx * fx + ky * fy) + ph);
+        }
+        // Subtle blown-glass quarry pillowing
+        const qx = Math.sin(TAU * 6 * fx), qy = Math.sin(TAU * 9 * fy);
+        s += 0.14 * qx * qy;
+        H[y * N + x] = s;
+      }
+    }
+
+    const data = new Uint8Array(N * N * 4);
+    for (let y = 0; y < N; y++) {
+      const ym = (y - 1 + N) & (N - 1), yp = (y + 1) & (N - 1);
+      for (let x = 0; x < N; x++) {
+        const xm = (x - 1 + N) & (N - 1), xp = (x + 1) & (N - 1);
+        const hc = H[y * N + x];
+        const dx = (H[y * N + xp] - H[y * N + xm]) * 2.6;
+        const dy = (H[yp * N + x] - H[ym * N + x]) * 2.6;
+        const lap = (H[y * N + xp] + H[y * N + xm] + H[yp * N + x] + H[ym * N + x] - 4.0 * hc) * 9.5;
+        // Optical caustic irradiance concentration: 1 / max(0.28, 1 + k * laplacian)
+        const caustic = clamp(1.0 / Math.max(0.30, 1.0 + lap * 0.75), 0.25, 2.65) / 2.65;
+
+        const idx = (y * N + x) * 4;
+        data[idx]     = clamp(Math.round((0.5 + 0.5 * Math.tanh(dx)) * 255), 0, 255);
+        data[idx + 1] = clamp(Math.round((0.5 + 0.5 * Math.tanh(dy)) * 255), 0, 255);
+        data[idx + 2] = clamp(Math.round(caustic * 255), 0, 255);
+        data[idx + 3] = 255;
+      }
+    }
+
+    const tex = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE2);
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, N, N, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    return tex;
+  }
+
+  // 256x256 3D value-noise lookup texture (R and G shifted by (37,17) for single-fetch trilinear 3D noise)
+  function buildNoiseTexture() {
+    const N = 256;
+    const R = new Uint8Array(N * N);
+    const data = new Uint8Array(N * N * 4);
+    for (let i = 0; i < R.length; i++) R[i] = (Math.random() * 256) | 0;
+    for (let y = 0; y < N; y++) {
+      for (let x = 0; x < N; x++) {
+        const i = (y * N + x) * 4;
+        data[i]     = R[y * N + x];
+        data[i + 1] = R[((y + 17) & 255) * N + ((x + 37) & 255)];
+        data[i + 2] = (Math.random() * 256) | 0;
+        data[i + 3] = 255;
+      }
+    }
+    const tex = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, N, N, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    return tex;
+  }
+
+  buildNoiseTexture();
+  buildStainedGlassTexture();
+  buildAntiqueWaveTexture();
+
+  /* =========================================================================
+     2. GLSL SHADERS — ZERO-AMBIENT PURE-LIGHT 3D GOTHIC SANCTUARY
+     - Analytic 3D Gothic architecture:
+       * 3 splayed Gothic stained-glass lancet & rose windows on right wall (x=3.20..3.74)
+       * Perpendicular cut-stone ashlar sanctuary wall (z=14.2) with:
+         - 3D recessed pointed Gothic wall niche (x=0.58, y=0.72..2.58)
+         - 3D carved Baroque/Gothic relief frame casting live raking shadows (x=-1.05, y=1.18..3.48)
+       * Free-standing quatrefoil clustered piers (x=-1.12, z=4.9, 9.3) + engaged wall shafts
+       * Pointed Gothic ribbed barrel vault overhead (y=7.35..12.05)
+       * Two sanctuary stone steps (z=10.8, 11.8) + limestone flagstones with grazing Fresnel sheen
+     - Strictly ZERO global ambient: unlit stone is #000000; space exists ONLY through light!
+     ========================================================================= */
+  const SHADER_HEADER_FS = isWebGL2
+    ? `#version 300 es
+       precision highp float;
+       out vec4 fragColor;
+       #define TEX2D texture
+       #define TEXLOD textureLod
+       #define OUT_COLOR fragColor`
+    : `${extLod ? '#extension GL_EXT_shader_texture_lod : enable' : ''}
+       precision highp float;
+       #define TEX2D texture2D
+       #define TEXLOD ${extLod ? 'texture2DLodEXT' : 'texture2D'}
+       #define OUT_COLOR gl_FragColor`;
+
+  const SHADER_HEADER_VS_QUAD = isWebGL2
+    ? `#version 300 es
+       in vec2 aPos;
+       void main(){ gl_Position = vec4(aPos, 0.0, 1.0); }`
+    : `attribute vec2 aPos;
+       void main(){ gl_Position = vec4(aPos, 0.0, 1.0); }`;
+
+  const SHADER_HEADER_VS_DUST = isWebGL2
+    ? `#version 300 es
+       precision highp float;
+       in vec4 aSeed;
+       out vec3 vCol;
+       #define TEX2D texture
+       #define TEXLOD textureLod`
+    : `precision highp float;
+       attribute vec4 aSeed;
+       varying vec3 vCol;
+       #define TEX2D texture2D
+       #define TEXLOD(s, u, l) texture2D(s, u)`;
+
+  const SHADER_HEADER_FS_DUST = isWebGL2
+    ? `#version 300 es
+       precision highp float;
+       in vec3 vCol;
+       out vec4 fragColor;
+       #define OUT_COLOR fragColor`
+    : `precision highp float;
+       varying vec3 vCol;
+       #define OUT_COLOR gl_FragColor`;
+
+  const COMMON_OPTICS = `
+    uniform vec3 uSun;
+    uniform vec3 uSunCol;
+    uniform float uTime;
+    uniform sampler2D uGlass;
+    uniform sampler2D uWave;
+
+    const float WX = 3.20, WG = 3.54, WO = 3.74;
+    const float LX = -3.40, ZN = -2.20, ZF = 14.20;
+    const float WIN0 = -1.35, WSP = 7.00, NWIN = 3.0;
+    const float SILL = 2.15, HWIN = 6.80, WWIN = 2.08;
+    const float PIERX = -2.15, PIERR = 0.35, PIER0 = 2.15;
+
+    float h21(vec2 p) {
+      p = fract(p * vec2(123.34, 456.21));
+      p += dot(p, p + 45.32);
+      return fract(p.x * p.y);
+    }
+
+    // Pointed Gothic arch SDF: p.y relative to springing line
+    float pointedArchSD(vec2 p, float hw, float R) {
+      if (p.y < 0.0) return abs(p.x) - hw;
+      float c = R - hw;
+      return length(vec2(abs(p.x) + c, p.y)) - R;
+    }
+
+    // Outer stone window embrasure in local meter coords q = (z - wc, y - SILL)
+    float outerWinSD(vec2 q) {
+      float dArch = pointedArchSD(vec2(q.x, q.y - 4.42), 0.96, 2.95);
+      return max(dArch, -q.y);
+    }
+
+    float winCenter(float z) {
+      return WIN0 + WSP * clamp(floor((z - WIN0) / WSP + 0.5), 0.0, NWIN - 1.0);
+    }
+
+    // Recessed Gothic niche opening on front ashlar wall z = ZF (positioned like reference photo!)
+    const float NICHE_X = 1.15;
+    float nicheArchSD(vec2 p) {
+      float d = pointedArchSD(vec2(p.x - NICHE_X, p.y - 1.56), 0.44, 1.08);
+      return max(d, 0.62 - p.y);
+    }
+
+    // 3D Carved Baroque/Gothic Relief Frame heightfield on z = ZF wall (lower-left of corner, matching photo!)
+    const vec2 RELIEF_C = vec2(-0.18, 2.12);
+    float reliefHeight(vec2 p) {
+      vec2 q = p - RELIEF_C;
+      if (abs(q.x) > 0.85 || q.y < -1.10 || q.y > 1.55) return 0.0;
+      float h = 0.0;
+      vec2 b = abs(vec2(q.x, q.y + 0.08)) - vec2(0.54, 0.80);
+      float dBox = max(b.x, b.y);
+      if (dBox < 0.0) {
+        float rim = -dBox;
+        float m1 = smoothstep(0.0, 0.025, rim) * (1.0 - smoothstep(0.09, 0.13, rim));
+        float m2 = smoothstep(0.11, 0.13, rim) * (1.0 - smoothstep(0.16, 0.19, rim));
+        h = 0.038 + 0.105 * m1 + 0.060 * m2;
+        if (rim > 0.18) {
+          float fig = exp(-dot(vec2(q.x * 2.6, (q.y - 0.05) * 1.6), vec2(q.x * 2.6, (q.y - 0.05) * 1.6)));
+          h += 0.020 * fig * (0.7 + 0.3 * sin(q.x * 28.0 + sin(q.y * 16.0)));
+        }
+      }
+      vec2 c = vec2(abs(q.x), q.y - 0.72);
+      if (c.y > -0.08 && c.y < 0.62 && c.x < 0.62) {
+        float centralMedallion = 0.23 - length(vec2(c.x * 1.15, (c.y - 0.24) * 0.92));
+        if (centralMedallion > 0.0) {
+          h = max(h, 0.065 + 0.09 * smoothstep(0.0, 0.07, centralMedallion));
+        }
+        float scroll = 0.11 - abs(length(c - vec2(0.29, 0.10)) - 0.13);
+        if (scroll > 0.0 && c.y < 0.30) {
+          h = max(h, 0.08 * smoothstep(0.0, 0.05, scroll));
+        }
+        float finial = 0.085 - length(vec2((c.x - 0.48) * 1.5, (c.y - 0.13) * 0.85));
+        if (finial > 0.0) {
+          h = max(h, 0.105 * smoothstep(0.0, 0.04, finial));
+        }
+      }
+      if (abs(q.x) < 0.60 && abs(q.y + 0.92) < 0.065) {
+        h = max(h, 0.095 * (1.0 - abs(q.y + 0.92) / 0.065));
+      }
+      return h;
+    }
+
+    // Soft shadow from a row of cylindrical piers along x = cx
+    float pierRowVis(vec3 p, vec2 sunXZ, float invSunX, float cx, float r, float z0, float count, float softExtra) {
+      float dx = cx - p.x;
+      if (dx <= 0.0) return 1.0;
+      float zCross = p.z + (uSun.z * invSunX) * dx;
+      float zPier = z0 + WSP * clamp(floor((zCross - z0) / WSP + 0.5), 0.0, count - 1.0);
+      vec2 toPier = vec2(cx - p.x, zPier - p.z);
+      float proj = dot(toPier, sunXZ);
+      if (proj <= 0.0) return 1.0;
+      float perp = abs(toPier.x * sunXZ.y - toPier.y * sunXZ.x);
+      float pen = 0.022 + softExtra + 0.008 * length(toPier);
+      return smoothstep(r - pen, r + pen, perp);
+    }
+
+    // Convert sRGB stained-glass texture into rich linear optical transmittance
+    vec3 linearGlass(vec3 srgb) {
+      vec3 lin = pow(max(srgb, 0.0), vec3(2.15));
+      float luma = dot(lin, vec3(0.2126, 0.7152, 0.0722));
+      return max(mix(vec3(luma), lin, 1.22), 0.0);
+    }
+
+    // Colored sunlight arriving at 3D point p:
+    // softMode = true  -> Nyquist-bandlimited smooth shafts for stipple-free Tyndall scattering
+    // softMode = false -> painterly opalescent antique-glass caustics + watery filaments on stone!
+    vec3 sampleSunlight(vec3 p, bool softMode) {
+      if (uSun.x < 0.035) return vec3(0.0);
+      float invX = 1.0 / uSun.x;
+      float tG = (WG - p.x) * invX;
+      if (tG <= 0.0) return vec3(0.0);
+
+      vec3 qg = p + uSun * tG;
+      if (qg.y < SILL - 0.35 || qg.y > SILL + HWIN + 0.20) return vec3(0.0);
+
+      float wc = winCenter(qg.z);
+      vec2 lg = vec2(qg.z - wc, qg.y - SILL);
+      if (abs(lg.x) > 1.18) return vec3(0.0);
+
+      vec3 qi = p + uSun * max(0.0, (WX - p.x) * invX);
+      vec3 qo = p + uSun * ((WO - p.x) * invX);
+      // Nyquist-matched penumbra in softMode; distance-softened optical cone on stone
+      float pen = (softMode ? 0.095 : 0.018) + tG * (softMode ? 0.018 : 0.024);
+
+      float dIn = pointedArchSD(vec2(qi.z - wc, qi.y - SILL - 4.42), 1.24, 3.23);
+      dIn = max(dIn, (SILL - 0.34) - qi.y);
+      float mIn = 1.0 - smoothstep(-pen, pen, dIn);
+      if (mIn < 0.002) return vec3(0.0);
+
+      float dGlass = outerWinSD(lg) + 0.045;
+      float mGlass = 1.0 - smoothstep(-pen, pen, dGlass);
+      if (mGlass < 0.002) return vec3(0.0);
+
+      float dOut = outerWinSD(vec2(qo.z - wc, qo.y - SILL)) - 0.05;
+      float mOut = 1.0 - smoothstep(-pen, pen, dOut);
+      float mask = mIn * mGlass * mOut;
+      if (mask < 0.002) return vec3(0.0);
+
+      vec2 sunXZ = normalize(uSun.xz);
+      float pExtra = softMode ? 0.055 : 0.0;
+      if (p.x < PIERX + PIERR + 0.05) {
+        mask *= pierRowVis(p, sunXZ, invX, PIERX, PIERR, PIER0, 2.0, pExtra);
+        if (mask < 0.002) return vec3(0.0);
+      }
+      if (p.x < WX - 0.02) {
+        mask *= pierRowVis(p, sunXZ, invX, WX, 0.24, PIER0, 2.0, pExtra);
+        if (mask < 0.002) return vec3(0.0);
+      }
+
+      if (p.z > ZF + 0.003) {
+        if (uSun.z >= -0.01) return vec3(0.0);
+        float tWall = (ZF - p.z) / uSun.z;
+        vec3 qw = p + uSun * tWall;
+        mask *= 1.0 - smoothstep(-0.02, 0.02, nicheArchSD(qw.xy));
+        if (mask < 0.002) return vec3(0.0);
+      }
+
+      vec2 uv = vec2(lg.x / WWIN + 0.5, lg.y / HWIN);
+      if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) return vec3(0.0);
+
+      float wi = (wc - WIN0) / WSP;
+
+      if (softMode) {
+        float lod = (tG < 0.95) ? 5.5 : clamp(2.65 + tG * 0.24, 2.5, 4.4);
+        vec3 raw = TEXLOD(uGlass, uv, lod).rgb;
+        return linearGlass(raw) * mask;
+      }
+
+      // True mouth-blown Verre-Antique cathedral caustics (matching the reference photo's stone wall!):
+      // Multi-scale cylinder waves + soft quarry wedge refraction melt rigid mullions into opalescent clouds!
+      vec2 wuv1 = uv * vec2(1.4, 2.9) + vec2(wi * 0.37, wi * 0.61);
+      vec2 wuv2 = uv * vec2(3.3, 6.8) + vec2(wi * 0.73 + 0.19, wi * 0.29);
+      vec2 wuv3 = uv * vec2(6.5, 13.0) + vec2(0.41, 0.17);
+      vec3 wv1 = TEXLOD(uWave, wuv1, 0.25).rgb;
+      vec3 wv2 = TEXLOD(uWave, wuv2, 0.45).rgb;
+      vec3 wv3 = TEXLOD(uWave, wuv3, 0.65).rgb;
+      vec2 slope = (wv1.xy - 0.5) * 1.65 + (wv2.xy - 0.5) * 1.05 + (wv3.xy - 0.5) * 0.48;
+
+      float spread = clamp((tG - 0.25) * 0.30, 0.0, 1.35);
+      vec2 defl = slope * (0.068 * spread);
+      float lodBase = clamp(1.35 + spread * 2.10, 1.10, 3.95);
+      float lodGlow = clamp(lodBase + 1.25, 2.35, 4.90);
+
+      float r = TEXLOD(uGlass, clamp(uv + defl * 0.86, 0.004, 0.996), lodBase).r;
+      float g = TEXLOD(uGlass, clamp(uv + defl * 1.00, 0.004, 0.996), lodBase).g;
+      float b = TEXLOD(uGlass, clamp(uv + defl * 1.15, 0.004, 0.996), lodBase).b;
+      vec3 halo = linearGlass(TEXLOD(uGlass, clamp(uv + defl * 0.42, 0.004, 0.996), lodGlow).rgb);
+
+      vec3 trans = mix(linearGlass(vec3(r, g, b)), halo, 0.48 * clamp(spread, 0.0, 1.0));
+      float causField = 0.48 * wv1.z + 0.36 * wv2.z + 0.16 * wv3.z;
+      float causticFocus = mix(1.0, 0.46 + 1.68 * causField, clamp(spread * 0.95, 0.0, 1.0));
+      // Warm mother-of-pearl grisaille shimmer along bright caustic focal ribbons
+      float filament = smoothstep(0.44, 0.82, causField) * clamp(spread, 0.0, 1.0);
+      vec3 pearlLift = mix(pow(max(trans, 1e-4), vec3(0.56)), vec3(1.0, 0.89, 0.80), 0.38) * (0.38 * filament);
+      return (trans * causticFocus + pearlLift) * (mask * 0.88);
+    }
+
+    // Dual-lobe Mie + Rayleigh Tyndall phase function
+    float tyndallPhase(float cosTheta) {
+      float g1 = 0.58;
+      float mie1 = (1.0 - g1 * g1) / pow(1.0 + g1 * g1 - 2.0 * g1 * cosTheta, 1.5);
+      float g2 = 0.16;
+      float mie2 = (1.0 - g2 * g2) / pow(1.0 + g2 * g2 - 2.0 * g2 * cosTheta, 1.5);
+      return 0.28 + 0.22 * mie2 + 0.10 * mie1;
+    }
+  `;
+
+  const FS_SCENE = `${SHADER_HEADER_FS}
+    ${COMMON_OPTICS}
+    uniform vec2 uRes;
+    uniform vec3 uRo, uRt, uUp, uFw;
+    uniform float uFocal, uExpo;
+    uniform int uSteps;
+    uniform sampler2D uNoise;
+
+    const float SUN_POWER = 10.5;
+    const float HAZE_SCATTER = 0.042;
+    const float AIR_EXT = 0.036;
+    const float VAULT_Y = 9.05;
+
+    float noise3(vec3 x) {
+      vec3 p = floor(x);
+      vec3 f = fract(x);
+      f = f * f * (3.0 - 2.0 * f);
+      vec2 uv = (p.xy + vec2(37.0, 17.0) * p.z) + f.xy;
+      vec2 rg = TEX2D(uNoise, (uv + 0.5) / 256.0).xy;
+      return mix(rg.x, rg.y, f.z);
+    }
+
+    float hitCylXZ(vec3 ro, vec3 rd, vec2 c, float r) {
+      vec2 oc = ro.xz - c;
+      vec2 d = rd.xz;
+      float a = dot(d, d);
+      float b = dot(oc, d);
+      float cc = dot(oc, oc) - r * r;
+      float h = b * b - a * cc;
+      if (h < 0.0 || a < 1e-6) return 1e9;
+      float t = (-b - sqrt(h)) / a;
+      return t > 1e-4 ? t : 1e9;
+    }
+
+    float exitCylXY(vec3 ro, vec3 rd, vec2 c, float r) {
+      vec2 oc = ro.xy - c;
+      vec2 d = rd.xy;
+      float a = dot(d, d);
+      float b = dot(oc, d);
+      float cc = dot(oc, oc) - r * r;
+      float h = b * b - a * cc;
+      if (h < 0.0 || a < 1e-6) return 1e9;
+      float t = (-b + sqrt(h)) / a;
+      return t > 1e-4 ? t : 1e9;
+    }
+
+    float traceSanctuary(vec3 ro, vec3 rd, out vec3 n, out float mat) {
+      float t = 1e9;
+      n = vec3(0.0, 1.0, 0.0);
+      mat = 0.0;
+
+      // 1. Left & Right nave walls
+      if (rd.x > 1e-5) {
+        float tx = (WX - ro.x) / rd.x;
+        vec3 p = ro + rd * tx;
+        float wc = winCenter(p.z);
+        float dIn = pointedArchSD(vec2(p.z - wc, p.y - SILL - 4.42), 1.24, 3.23);
+        dIn = max(dIn, (SILL - 0.34) - p.y);
+        if (dIn >= 0.0) {
+          t = tx; n = vec3(-1.0, 0.0, 0.0); mat = 0.0;
+        } else {
+          float tGlass = (WG - ro.x) / rd.x;
+          float hitEmb = 0.0;
+          float tPrev = tx;
+          for (int k = 1; k <= 12; k++) {
+            float tk = mix(tx, tGlass, float(k) / 12.0);
+            vec3 q = ro + rd * tk;
+            float u = clamp((q.x - WX) / (WG - WX), 0.0, 1.0);
+            float hw = mix(1.24, 0.96, u);
+            float sillY = mix(SILL - 0.34, SILL, u);
+            float sd = max(pointedArchSD(vec2(q.z - wc, q.y - SILL - 4.42), hw, 2.95 + (hw - 0.96)), sillY - q.y);
+            if (sd >= 0.0) {
+              t = 0.5 * (tPrev + tk);
+              vec3 hq = ro + rd * t;
+              if (hq.y < SILL + 0.06 && abs(hq.z - wc) < 1.02) {
+                n = normalize(vec3(-0.68, 0.73, 0.0));
+              } else {
+                float sgnZ = sign(hq.z - wc);
+                n = normalize(vec3(-0.707, (hq.y > SILL + 4.42 ? -0.32 : 0.0), -0.707 * sgnZ));
+              }
+              mat = 6.0;
+              hitEmb = 1.0;
+              break;
+            }
+            tPrev = tk;
+          }
+          if (hitEmb < 0.5) {
+            t = tGlass; n = vec3(-1.0, 0.0, 0.0); mat = 4.0;
+          }
+        }
+      } else if (rd.x < -1e-5) {
+        float tx = (LX - ro.x) / rd.x;
+        if (tx > 0.0 && tx < t) { t = tx; n = vec3(1.0, 0.0, 0.0); mat = 0.0; }
+      }
+
+      // 2. Front sanctuary ashlar wall (z = ZF) + 3D recessed pointed Gothic niche
+      if (rd.z > 1e-5) {
+        float tz = (ZF - ro.z) / rd.z;
+        if (tz > 0.0 && tz < t) {
+          vec3 p = ro + rd * tz;
+          if (nicheArchSD(p.xy) < 0.0) {
+            float tSill = rd.y < -1e-5 ? (0.62 - ro.y) / rd.y : 1e9;
+            vec2 oc = ro.xz - vec2(NICHE_X, ZF - 0.06);
+            vec2 d = rd.xz;
+            float a = dot(d, d), b = dot(oc, d), cc = dot(oc, oc) - 0.49 * 0.49;
+            float disc = b * b - a * cc;
+            float tApse = (disc >= 0.0 && a > 1e-6) ? (-b + sqrt(disc)) / a : (ZF + 0.40 - ro.z) / rd.z;
+            if (tSill > tz && tSill < tApse) {
+              t = tSill; n = vec3(0.0, 1.0, 0.0); mat = 7.0;
+            } else if (tApse > tz && tApse < t) {
+              vec3 qa = ro + rd * tApse;
+              t = tApse;
+              n = normalize(vec3(NICHE_X - qa.x, (qa.y > 1.60 ? -0.38 * (qa.y - 1.60) : 0.0), (ZF - 0.06) - qa.z));
+              mat = 7.0;
+            }
+          } else {
+            t = tz; n = vec3(0.0, 0.0, -1.0); mat = 5.0;
+          }
+        }
+      } else if (rd.z < -1e-5) {
+        float tz = (ZN - ro.z) / rd.z;
+        if (tz > 0.0 && tz < t) { t = tz; n = vec3(0.0, 0.0, 1.0); mat = 0.0; }
+      }
+
+      // 3. Floor & Two Sanctuary Stone Steps (z = 11.2, 12.2)
+      if (rd.y < -1e-5) {
+        for (int s = 0; s < 3; s++) {
+          float hy = float(s) * 0.20;
+          float ty = (hy - ro.y) / rd.y;
+          if (ty > 0.0 && ty < t) {
+            vec3 p = ro + rd * ty;
+            float zMin = (s == 0 ? ZN : (s == 1 ? 11.2 : 12.2));
+            float zMax = (s == 0 ? 11.2 : (s == 1 ? 12.2 : ZF + 0.5));
+            if (p.z >= zMin - 1e-3 && p.z <= zMax + 1e-3) {
+              t = ty; n = vec3(0.0, 1.0, 0.0); mat = 1.0;
+            }
+          }
+        }
+      }
+      if (rd.z > 1e-5) {
+        for (int s = 0; s < 2; s++) {
+          float zs = (s == 0 ? 11.2 : 12.2);
+          float tr = (zs - ro.z) / rd.z;
+          if (tr > 0.0 && tr < t) {
+            vec3 p = ro + rd * tr;
+            float yLo = float(s) * 0.20;
+            if (p.y >= yLo && p.y <= yLo + 0.20) {
+              t = tr; n = vec3(0.0, 0.0, -1.0); mat = 1.0;
+            }
+          }
+        }
+      }
+
+      // 4. Pointed Gothic Ribbed Barrel Vault overhead
+      float tv1 = exitCylXY(ro, rd, vec2(2.10, VAULT_Y), 5.85);
+      float tv2 = exitCylXY(ro, rd, vec2(-2.10, VAULT_Y), 5.85);
+      float tv = min(tv1, tv2);
+      if (tv < t) {
+        vec3 pv = ro + rd * tv;
+        if (pv.y >= VAULT_Y - 0.02) {
+          t = tv;
+          vec2 vc = (tv1 < tv2) ? vec2(2.10, VAULT_Y) : vec2(-2.10, VAULT_Y);
+          n = normalize(vec3(vc.x - pv.x, vc.y - pv.y, 0.0));
+          mat = 2.0;
+        }
+      }
+
+      // 5. Free-standing Quatrefoil Piers & Engaged Gothic Wall Shafts (at z = 2.5, 8.5)
+      for (int i = 0; i < 2; i++) {
+        float zp = PIER0 + WSP * float(i);
+        float tp = hitCylXZ(ro, rd, vec2(PIERX, zp), PIERR);
+        if (tp < t) {
+          vec3 q = ro + rd * tp;
+          t = tp; n = normalize(vec3(q.x - PIERX, 0.0, q.z - zp)); mat = 3.0;
+        }
+        float tw = hitCylXZ(ro, rd, vec2(WX, zp), 0.24);
+        if (tw < t) {
+          vec3 q = ro + rd * tw;
+          t = tw; n = normalize(vec3(q.x - WX, 0.0, q.z - zp)); mat = 3.0;
+        }
+        float tl = hitCylXZ(ro, rd, vec2(LX, zp), 0.32);
+        if (tl < t) {
+          vec3 q = ro + rd * tl;
+          t = tl; n = normalize(vec3(q.x - LX, 0.0, q.z - zp)); mat = 3.0;
+        }
+      }
+      float tCorner = hitCylXZ(ro, rd, vec2(WX - 0.06, ZF - 0.08), 0.28);
+      if (tCorner < t) {
+        vec3 q = ro + rd * tCorner;
+        t = tCorner; n = normalize(vec3(q.x - (WX - 0.06), 0.0, q.z - (ZF - 0.08))); mat = 3.0;
+      }
+
+      return t;
+    }
+
+    vec3 shadeStoneMaterial(vec3 p, inout vec3 n, float mat, out float reliefShadow) {
+      reliefShadow = 1.0;
+      float grain = noise3(p * 6.0) * 0.55 + noise3(p * 23.0) * 0.45;
+
+      if (mat == 1.0) {
+        if (abs(n.z) > 0.5) {
+          return vec3(0.68, 0.65, 0.61) * (0.82 + 0.32 * grain);
+        }
+        vec2 u = p.xz / 0.92;
+        vec2 id = floor(u);
+        vec2 f = fract(u);
+        float edge = min(min(f.x, 1.0 - f.x), min(f.y, 1.0 - f.y));
+        float checker = mod(id.x + id.y, 2.0);
+        vec3 base = mix(vec3(0.64, 0.61, 0.58), vec3(0.35, 0.34, 0.36), checker * 0.62);
+        n = normalize(n + vec3((h21(id) - 0.5) * 0.04, 0.0, (h21(id + 7.1) - 0.5) * 0.04));
+        return base * (0.82 + 0.34 * h21(id * 1.3)) * (0.80 + 0.38 * grain) * mix(0.32, 1.0, smoothstep(0.0, 0.024, edge));
+      }
+
+      if (mat == 2.0) {
+        float bayZ = abs(p.z - (PIER0 + WSP * clamp(floor((p.z - PIER0) / WSP + 0.5), 0.0, 1.0)));
+        float wc = winCenter(p.z);
+        float diagRib = min(abs(abs(p.x) * 0.72 - abs(p.z - wc) * 0.62), bayZ);
+        float ribMask = 1.0 - smoothstep(0.08, 0.18, diagRib);
+        float ridge = 1.0 - smoothstep(0.05, 0.12, abs(p.x));
+        float rib = max(ribMask, ridge);
+        n = normalize(n + vec3(0.0, -0.22 * rib, (p.z > wc ? 0.16 : -0.16) * ribMask));
+        return mix(vec3(0.48, 0.46, 0.45), vec3(0.76, 0.73, 0.69), rib) * (0.80 + 0.35 * grain);
+      }
+
+      if (mat == 3.0) {
+        float ang = atan(n.z, n.x);
+        vec3 tang = vec3(-n.z, 0.0, n.x);
+        float flute = sin(ang * 8.0) * 0.28 + sin(ang * 24.0) * 0.10;
+        float capBand = exp(-pow((p.y - 7.15) * 5.5, 2.0)) + exp(-pow((p.y - 0.52) * 6.5, 2.0));
+        n = normalize(n + tang * flute + vec3(0.0, (p.y - 7.15) * 1.2 * capBand, 0.0));
+        float drum = fract(p.y / 0.56);
+        float joint = smoothstep(0.0, 0.032, min(drum, 1.0 - drum));
+        return vec3(0.72, 0.69, 0.66) * (0.82 + 0.34 * grain) * mix(0.46, 1.0, joint) * (1.0 + 0.18 * capBand);
+      }
+
+      if (mat == 6.0 || mat == 7.0) {
+        float row = fract(p.y / 0.42);
+        float joint = smoothstep(0.0, 0.03, min(row, 1.0 - row));
+        return vec3(0.76, 0.73, 0.70) * (0.84 + 0.32 * grain) * mix(0.48, 1.0, joint);
+      }
+
+      // Cut-stone Ashlar Masonry Wall
+      vec2 u = abs(n.x) > 0.5 ? p.zy : p.xy;
+      float courseH = 0.42;
+      float row = floor(u.y / courseH);
+      float ux = (u.x / 0.88) + mod(row, 2.0) * 0.5;
+      vec2 cell = vec2(floor(ux), row);
+      vec2 f = vec2(fract(ux), fract(u.y / courseH));
+      float mortar = min(min(f.x, 1.0 - f.x) * 0.88, min(f.y, 1.0 - f.y) * courseH);
+
+      vec3 tU = abs(n.x) > 0.5 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
+      n = normalize(n
+        + tU * ((h21(cell + 3.7) - 0.5) * 0.065)
+        + vec3(0.0, (h21(cell + 9.2) - 0.5) * 0.065, 0.0));
+
+      vec3 stone = vec3(0.76, 0.73, 0.70)
+        * (0.84 + 0.28 * h21(cell + mat * 5.0))
+        * (0.82 + 0.34 * grain)
+        * mix(0.30, 1.0, smoothstep(0.003, 0.020, mortar));
+
+      if (mat == 0.0 && n.x > 0.5) {
+        float bc = WIN0 + WSP * clamp(floor((p.z - WIN0) / WSP + 0.5), 0.0, 2.0);
+        float dBlind = abs(pointedArchSD(vec2(p.z - bc, p.y - 4.6), 1.45, 3.20));
+        if (dBlind < 0.14 && p.y > 0.6) {
+          float mold = sin((dBlind / 0.14) * 9.42);
+          n = normalize(n + vec3(0.0, 0.16 * mold, 0.26 * mold * sign(p.z - bc)));
+          stone *= 1.08;
+        }
+      }
+
+      if (mat == 5.0) {
+        float dn = nicheArchSD(p.xy);
+        if (dn > 0.0 && dn < 0.14 && p.y > 0.58) {
+          float archWave = cos((dn / 0.14) * 12.56);
+          vec2 gradN = normalize(vec2(p.x - NICHE_X, max(0.05, p.y - 1.46)));
+          n = normalize(n + vec3(gradN * 0.36 * archWave, 0.0));
+          stone *= 1.08;
+        }
+
+        float h0 = reliefHeight(p.xy);
+        if (h0 > 0.001) {
+          float eps = 0.012;
+          float hx = reliefHeight(p.xy + vec2(eps, 0.0)) - reliefHeight(p.xy - vec2(eps, 0.0));
+          float hy = reliefHeight(p.xy + vec2(0.0, eps)) - reliefHeight(p.xy - vec2(0.0, eps));
+          n = normalize(vec3(-hx / (2.0 * eps), -hy / (2.0 * eps), -1.0));
+          vec2 rq = p.xy - RELIEF_C;
+          bool innerCanvas = (abs(rq.x) < 0.36 && abs(rq.y + 0.08) < 0.62);
+          stone = innerCanvas
+            ? vec3(0.22, 0.23, 0.30) * (0.7 + 0.6 * grain)
+            : vec3(0.60, 0.54, 0.46) * (0.80 + 0.50 * smoothstep(0.04, 0.14, h0));
+        }
+
+        if (uSun.z < -0.04 && p.x < RELIEF_C.x + 0.85 && p.y < 3.92) {
+          vec2 stepDir = uSun.xy / (-uSun.z);
+          for (int k = 1; k <= 6; k++) {
+            float dz = float(k) * 0.032;
+            float hs = reliefHeight(p.xy + stepDir * dz);
+            if (hs > h0 + dz * 0.90) {
+              reliefShadow *= 0.10;
+              break;
+            }
+          }
+        }
+      }
+
+      return stone;
+    }
+
+    // Compact Gaussian local radiosity strictly hugging active caustic patches & sunlit rose crowns (ZERO rectangular bleed!)
+    vec3 localRadiosityBounce(vec3 p, vec3 n, float mat) {
+      if (uSun.x < 0.04) return vec3(0.0);
+      vec3 bounce = vec3(0.0);
+      vec3 glassTint = vec3(0.36, 0.42, 0.96) * uSunCol;
+      vec3 roseTint  = vec3(0.54, 0.42, 0.96) * uSunCol;
+      for (int i = 1; i < 3; i++) {
+        float wc = WIN0 + WSP * float(i);
+        vec3 winOrigin = vec3(WG, SILL + 2.8, wc);
+        float tx = (LX - WG) / (-uSun.x);
+        float ty = (0.2 - winOrigin.y) / min(-0.08, -uSun.y);
+        float tz = uSun.z < -0.04 ? (ZF - winOrigin.z) / (-uSun.z) : 1e9;
+        float tPatch = min(min(tx, ty), tz);
+        vec3 patchPos = winOrigin - uSun * clamp(tPatch, 1.0, 10.5);
+        if (patchPos.z <= ZF + 0.25 && patchPos.z >= ZN) {
+          vec3 toPatch = patchPos - p;
+          float dist2 = dot(toPatch, toPatch);
+          float facing = 0.35 + 0.65 * max(0.0, dot(n, normalize(toPatch + vec3(0.0, 0.4, 0.0))));
+          bounce += glassTint * (exp(-dist2 * 0.38) * facing * 0.085);
+        }
+        // Strictly local upward refraction scatter from sunlit rose oculus onto adjacent Gothic vault ribs
+        if (p.y > 7.40) {
+          vec3 rosePos = vec3(WG - 0.22, SILL + 5.75, wc);
+          vec3 toRose = rosePos - p;
+          float rDist2 = dot(toRose, toRose);
+          float rFace = max(0.0, dot(n, normalize(toRose)));
+          float vaultGain = (mat == 2.0) ? 0.34 : 0.09;
+          bounce += roseTint * (exp(-rDist2 * 0.15) * rFace * vaultGain);
+        }
+      }
+      return bounce * smoothstep(0.04, 0.22, uSun.x);
+    }
+
+    void main() {
+      vec2 uvScreen = (gl_FragCoord.xy - 0.5 * uRes) / min(uRes.x, uRes.y);
+      vec3 ro = uRo;
+      vec3 rd = normalize(uvScreen.x * uRt + uvScreen.y * uUp + uFocal * uFw);
+
+      // Interleaved Gradient Noise (blue-noise-like screen jitter) -> liquid-velvet beams with zero grain!
+      float jit = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
+
+      vec3 n;
+      float mat;
+      float tHit = traceSanctuary(ro, rd, n, mat);
+      vec3 pHit = ro + rd * tHit;
+
+      float sunVis = smoothstep(0.035, 0.20, uSun.x);
+      vec3 sunRadiance = uSunCol * SUN_POWER;
+      vec3 col = vec3(0.0);
+
+      // 1. Direct view of translucent stained-glass panes (exact aperture mask + jewel chroma)
+      if (mat == 4.0) {
+        float wc = winCenter(pHit.z);
+        vec2 lg = vec2(pHit.z - wc, pHit.y - SILL);
+        float mGlass = 1.0 - smoothstep(-0.008, 0.008, outerWinSD(lg));
+        vec2 guv = vec2(lg.x / WWIN + 0.5, lg.y / HWIN);
+        if (mGlass > 0.0 && guv.x >= 0.0 && guv.x <= 1.0 && guv.y >= 0.0 && guv.y <= 1.0) {
+          vec3 gRaw = TEXLOD(uGlass, guv, 0.0).rgb;
+          vec3 gTrans = linearGlass(gRaw);
+          vec3 qo = ro + rd * ((WO - ro.x) / rd.x);
+          float mExt = 1.0 - smoothstep(-0.01, 0.01, outerWinSD(vec2(qo.z - wc, qo.y - SILL)) - 0.05);
+          float forwardAlign = max(dot(rd, uSun), 0.0);
+          vec3 backLight = mix(vec3(0.85, 0.90, 1.05), uSunCol, 0.55)
+            * (0.88 + 0.95 * sunVis + 4.5 * pow(forwardAlign, 14.0) * sunVis);
+          col += gTrans * backLight * mExt * mGlass;
+        }
+      } else {
+        // 2. Pure-Light Surface Shading (strictly ZERO global ambient!)
+        float reliefShad;
+        vec3 alb = shadeStoneMaterial(pHit, n, mat, reliefShad);
+
+        float ndl = max(dot(n, uSun), 0.0);
+        float rakingNdl = pow(ndl, 0.78);
+        bool nearJamb = (mat == 6.0) || (mat == 3.0 && pHit.x > 2.5);
+        vec3 directGlass = (ndl > 0.001) ? sampleSunlight(pHit + n * 0.006, nearJamb) : vec3(0.0);
+        vec3 bounceLight = localRadiosityBounce(pHit, n, mat);
+
+        col += alb * (directGlass * sunRadiance * rakingNdl * reliefShad + bounceLight);
+
+        if (mat == 1.0 || mat == 5.0 || mat == 6.0) {
+          vec3 halfV = normalize(uSun - rd);
+          float spec = pow(max(dot(n, halfV), 0.0), mat == 1.0 ? 28.0 : 18.0);
+          col += directGlass * sunRadiance * spec * (mat == 1.0 ? 0.18 : 0.09) * reliefShad;
+        }
+      }
+
+      col *= exp(-AIR_EXT * min(tHit, 26.0));
+
+      // 3. Tyndall Volumetric Scattering (clamped to interior air slab for ultra-dense step resolution)
+      float tStart = 0.20;
+      float tEnd = min(tHit, 15.0);
+      if (tEnd > tStart) {
+        float dt = (tEnd - tStart) / float(uSteps);
+        vec3 accumScatter = vec3(0.0);
+        for (int i = 0; i < 120; i++) {
+          if (i >= uSteps) break;
+          float ts = tStart + (float(i) + jit) * dt;
+          vec3 q = ro + rd * ts;
+          vec3 beam = sampleSunlight(q, true);
+          if (beam.r + beam.g + beam.b > 0.001) {
+            float n1 = noise3(q * 0.65 + vec3(0.0, -uTime * 0.055, uTime * 0.028));
+            float n2 = noise3(q * 1.95 + vec3(uTime * 0.042, -uTime * 0.105, -uTime * 0.02));
+            float density = 0.34 + 1.18 * n1 * n1 + 0.34 * n2;
+            accumScatter += beam * (density * exp(-AIR_EXT * ts));
+          }
+        }
+        float phase = tyndallPhase(dot(rd, uSun));
+        col += accumScatter * (dt * HAZE_SCATTER * phase) * sunRadiance;
+      }
+
+      // 4. Subtle sapphire-violet halation strictly near visible window bays
+      for (int i = 1; i < 3; i++) {
+        vec3 wPos = vec3(WG, SILL + 3.4, WIN0 + WSP * float(i));
+        if (wPos.z > ro.z + 0.5) {
+          float align = max(dot(rd, normalize(wPos - ro)), 0.0);
+          col += vec3(0.28, 0.35, 0.95) * uSunCol * (pow(align, 95.0) * 0.020 + pow(align, 520.0) * 0.045) * sunVis;
+        }
+      }
+
+      // 5. Chroma-preserving Filmic Tone Mapping
+      col *= uExpo;
+      float peak = max(col.r, max(col.g, col.b));
+      if (peak > 1e-5) {
+        float mappedPeak = (peak * (2.51 * peak + 0.03)) / (peak * (2.43 * peak + 0.59) + 0.14);
+        vec3 perCh = (col * (2.51 * col + 0.03)) / (col * (2.43 * col + 0.59) + 0.14);
+        col = mix(perCh, col * (mappedPeak / peak), 0.52);
+      }
+      col = pow(clamp(col, 0.0, 1.0), vec3(0.4545));
+
+      vec2 vq = gl_FragCoord.xy / uRes - 0.5;
+      col *= 1.0 - 0.34 * dot(vq, vq);
+      float lum = max(col.r, max(col.g, col.b));
+      col += ((jit - 0.5) / 220.0) * smoothstep(0.0, 0.02, lum);
+
+      OUT_COLOR = vec4(max(col, 0.0), 1.0);
+    }
+  `;
+
+  // 2,200 3D Dust Motes: 100% invisible in darkness, igniting with colored bokeh inside Tyndall shafts!
+  const VS_DUST = `${SHADER_HEADER_VS_DUST}
+    ${COMMON_OPTICS}
+    uniform vec2 uRes;
+    uniform vec3 uRo, uRt, uUp, uFw;
+    uniform float uFocal;
+
+    void main() {
+      float t = uTime;
+      vec3 base = vec3(
+        mix(-2.9, 3.05, aSeed.x),
+        aSeed.y,
+        mix(0.8, 13.9, pow(aSeed.z, 0.85))
+      );
+      vec3 p = base;
+      p.x += sin(t * 0.14 + aSeed.w * 42.0) * 0.32 + sin(t * 0.43 + aSeed.z * 71.0) * 0.07;
+      p.z += cos(t * 0.12 + aSeed.w * 29.0) * 0.32;
+      p.y = 0.25 + mod(base.y * 8.8 + t * (0.018 + 0.032 * aSeed.w) + sin(t * 0.55 + aSeed.x * 53.0) * 0.06, 8.8);
+
+      vec3 rel = p - uRo;
+      float zCam = dot(rel, uFw);
+      if (zCam < 0.35) {
+        gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+        gl_PointSize = 0.0;
+        vCol = vec3(0.0);
+        return;
+      }
+
+      vec3 beam = sampleSunlight(p, true);
+      if (beam.r + beam.g + beam.b < 0.003) {
+        gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+        gl_PointSize = 0.0;
+        vCol = vec3(0.0);
+        return;
+      }
+
+      float minDim = min(uRes.x, uRes.y);
+      vec2 proj = vec2(dot(rel, uRt), dot(rel, uUp)) * (uFocal / zCam);
+      gl_Position = vec4(proj * minDim / (0.5 * uRes), 0.0, 1.0);
+
+      // Gentle depth-of-field bokeh flare for near motes + scintillation twinkle
+      float twinkle = 0.35 + 0.65 * pow(0.5 + 0.5 * sin(t * (1.3 + aSeed.w * 3.1) + aSeed.x * 95.0), 2.2);
+      float rawSize = (0.012 * uFocal / zCam) * minDim + smoothstep(2.2, 0.5, zCam) * 4.5;
+      gl_PointSize = clamp(rawSize, 1.3, 8.5);
+      float bokehNorm = clamp(1.9 / max(1.3, gl_PointSize), 0.22, 1.0);
+      float phase = tyndallPhase(dot(normalize(rel), uSun));
+
+      vCol = beam * uSunCol * (phase * twinkle * bokehNorm * 1.35 * exp(-0.04 * zCam));
+    }
+  `;
+
+  const FS_DUST = `${SHADER_HEADER_FS_DUST}
+    void main() {
+      vec2 c = gl_PointCoord - 0.5;
+      float r2 = dot(c, c) * 4.0;
+      if (r2 > 1.0) discard;
+      float softDisc = exp(-r2 * 2.8) * (1.0 - r2 * 0.35);
+      OUT_COLOR = vec4(vCol * softDisc, 1.0);
+    }
+  `;
+
+  function compileShader(type, source) {
+    const sh = gl.createShader(type);
+    gl.shaderSource(sh, source);
+    gl.compileShader(sh);
+    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+      const log = gl.getShaderInfoLog(sh);
+      console.error('Shader compile error:', log);
+      throw new Error(log);
+    }
+    return sh;
+  }
+
+  function createProgram(vsSrc, fsSrc) {
+    const prog = gl.createProgram();
+    gl.attachShader(prog, compileShader(gl.VERTEX_SHADER, vsSrc));
+    gl.attachShader(prog, compileShader(gl.FRAGMENT_SHADER, fsSrc));
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+      throw new Error(gl.getProgramInfoLog(prog));
+    }
+    const uniforms = {};
+    const count = gl.getProgramParameter(prog, gl.ACTIVE_UNIFORMS);
+    for (let i = 0; i < count; i++) {
+      const info = gl.getActiveUniform(prog, i);
+      uniforms[info.name] = gl.getUniformLocation(prog, info.name);
+    }
+    return {
+      prog,
+      u: uniforms,
+      aPos: gl.getAttribLocation(prog, 'aPos'),
+      aSeed: gl.getAttribLocation(prog, 'aSeed')
+    };
+  }
+
+  let sceneProg, dustProg;
+  try {
+    sceneProg = createProgram(SHADER_HEADER_VS_QUAD, FS_SCENE);
+    dustProg = createProgram(VS_DUST, FS_DUST);
+  } catch (err) {
+    $('#fallbackNotice').hidden = false;
+    $('#fallbackNotice').textContent = '着色器初始化异常：' + err.message;
+    return;
+  }
+
+  const quadBuf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+
+  const DUST_COUNT = 2200;
+  const dustSeeds = new Float32Array(DUST_COUNT * 4);
+  for (let i = 0; i < dustSeeds.length; i++) dustSeeds[i] = Math.random();
+  const dustBuf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, dustBuf);
+  gl.bufferData(gl.ARRAY_BUFFER, dustSeeds, gl.STATIC_DRAW);
+
+  /* =========================================================================
+     3. ADAPTIVE RESOLUTION & 120HZ PROMOTION BUDGETING
+     ========================================================================= */
+  const isCoarse = matchMedia('(pointer: coarse)').matches;
+  const dpr = window.devicePixelRatio || 1;
+  const maxRenderScale = Math.min(dpr, isCoarse ? 1.65 : 1.5);
+  let renderScale = Math.min(dpr, isCoarse ? 1.1 : 1.05);
+  let marchSteps = isCoarse ? 50 : 62;
+
+  function applyPixelBudget() {
+    const w = canvas.clientWidth || innerWidth;
+    const h = canvas.clientHeight || innerHeight;
+    const maxPixels = isCoarse ? 580000 : 1200000;
+    renderScale = Math.min(renderScale, Math.sqrt(maxPixels / Math.max(1, w * h)));
+  }
+
+  function resizeCanvas() {
+    const w = canvas.clientWidth || innerWidth;
+    const h = canvas.clientHeight || innerHeight;
+    const cw = Math.max(2, Math.round(w * renderScale));
+    const ch = Math.max(2, Math.round(h * renderScale));
+    if (canvas.width !== cw || canvas.height !== ch) {
+      canvas.width = cw;
+      canvas.height = ch;
+    }
+  }
+  applyPixelBudget();
+  resizeCanvas();
+  addEventListener('resize', () => { applyPixelBudget(); resizeCanvas(); });
+
+  /* =========================================================================
+     4. GIMBAL-LOCK-FREE 3D ROTATION MATRIX GYROSCOPE CONTROLLER
+     Eliminates the classic beta=90° Euler flip when holding a phone upright!
+     Maps relative 3D pose M = R0^T * R_current smoothly to solar azimuth & elevation.
+     ========================================================================= */
+  const D2R = Math.PI / 180;
+  const R2D = 180 / Math.PI;
+
+  function matMul3(A, B) {
+    const C = new Float64Array(9);
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 3; c++) {
+        C[r * 3 + c] = A[r * 3] * B[c] + A[r * 3 + 1] * B[3 + c] + A[r * 3 + 2] * B[6 + c];
+      }
+    }
+    return C;
+  }
+
+  function matTranspose3(A) {
+    return new Float64Array([
+      A[0], A[3], A[6],
+      A[1], A[4], A[7],
+      A[2], A[5], A[8]
+    ]);
+  }
+
+  function rotZ3(a) {
+    const c = Math.cos(a), s = Math.sin(a);
+    return new Float64Array([c, -s, 0, s, c, 0, 0, 0, 1]);
+  }
+  function rotX3(a) {
+    const c = Math.cos(a), s = Math.sin(a);
+    return new Float64Array([1, 0, 0, 0, c, -s, 0, s, c]);
+  }
+  function rotY3(a) {
+    const c = Math.cos(a), s = Math.sin(a);
+    return new Float64Array([c, 0, s, 0, 1, 0, -s, 0, c]);
+  }
+
+  function getScreenOrientationRad() {
+    if (screen.orientation && typeof screen.orientation.angle === 'number') {
+      return screen.orientation.angle * D2R;
+    }
+    return (typeof window.orientation === 'number' ? window.orientation : 0) * D2R;
+  }
+
+  // W3C DeviceOrientation intrinsic Z(alpha) * X(beta) * Y(gamma) * Z(-screenAngle)
+  function deviceRotationMatrix(alphaDeg, betaDeg, gammaDeg) {
+    const a = (alphaDeg || 0) * D2R;
+    const b = (betaDeg || 0) * D2R;
+    const g = (gammaDeg || 0) * D2R;
+    const s = -getScreenOrientationRad();
+    return matMul3(matMul3(matMul3(rotZ3(a), rotX3(b)), rotY3(g)), rotZ3(s));
+  }
+
+  // Default calibrated sun center: az = -34°, el = 23° (illuminates hero corner wall, Gothic niche & relief!)
+  const sunState = {
+    tx: 0.0,       // normalized [-1, 1] around calibrated center
+    ty: 0.0,
+    x: 0.0,
+    y: 0.0,
+    vx: 0.0,
+    vy: 0.0,
+    mode: 'drift', // 'gyro' | 'touch' | 'drift'
+    R0T: null,     // transposed reference rotation matrix at calibration
+    lastLatestR: null,
+    lastInputAt: -1e9
+  };
+
+  function handleDeviceOrientation(e) {
+    if (e.beta === null && e.gamma === null) return;
+    const R = deviceRotationMatrix(e.alpha, e.beta, e.gamma);
+    sunState.lastLatestR = R;
+    if (!sunState.R0T) {
+      sunState.R0T = matTranspose3(R);
+    }
+    // Relative rotation M = R0^T * R in the user's comfortable calibrated hand frame
+    const M = matMul3(sunState.R0T, R);
+    // Screen +Z axis (0,0,1) in calibrated frame is column 2: (M[2], M[5], M[8])
+    // Plus subtle yaw blend from screen +X axis when phone is held flat on a desk
+    const horizTilt = Math.atan2(M[2], Math.hypot(M[5], M[8]) > 0.25 ? M[8] : 0.25) * R2D;
+    const flatSpin = Math.atan2(-M[3], M[0]) * R2D * Math.max(0, Math.abs(M[8]) - 0.65);
+    const vertTilt = Math.atan2(M[5], Math.hypot(M[2], M[8])) * R2D;
+
+    sunState.tx = clamp((horizTilt + flatSpin * 0.5) / 36.0, -1.0, 1.0);
+    sunState.ty = clamp(-vertTilt / 32.0, -1.0, 1.0);
+    sunState.mode = 'gyro';
+    sunState.lastInputAt = performance.now();
+  }
+
+  let gyroBound = false;
+  function bindGyroEvents() {
+    if (gyroBound) return;
+    gyroBound = true;
+    addEventListener('deviceorientation', handleDeviceOrientation, true);
+  }
+
+  async function requestGyroPermission() {
+    const DOE = window.DeviceOrientationEvent;
+    if (!DOE) return false;
+    try {
+      if (typeof DOE.requestPermission === 'function') {
+        const perm = await DOE.requestPermission();
+        if (perm !== 'granted') return false;
+      }
+      bindGyroEvents();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  // Auto-listen on Android / desktop browsers where no explicit permission gesture is required
+  if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission !== 'function') {
+    bindGyroEvents();
+  }
+
+  /* =========================================================================
+     5. THREE CURATED 3D CAMERA PERSPECTIVES & TOUCH LOOK / FALLBACK
+     ========================================================================= */
+  const VIEWS = [
+    {
+      name: '隅壁',
+      hint: '隅壁浮雕 · 彩窗焦散斜映尖拱圣龛与雕花画框',
+      pos: [-1.15, 2.38, 9.35],
+      tgt: [1.55, 4.65, 13.85]
+    },
+    {
+      name: '柱廊',
+      hint: '回廊纵深 · 双重彩窗丁达尔光束横切四叶束柱',
+      pos: [-2.68, 1.82, 3.15],
+      tgt: [1.45, 4.05, 12.65]
+    },
+    {
+      name: '穹顶',
+      hint: '尖拱肋穹 · 仰望玫瑰花窗与交叉石拱肋穹顶',
+      pos: [-0.45, 1.55, 10.35],
+      tgt: [1.65, 8.65, 13.35]
+    }
+  ];
+
+  let viewIdx = 0;
+  const camAnim = {
+    pos: [...VIEWS[0].pos],
+    tgt: [...VIEWS[0].tgt],
+    lookX: 0,
+    lookY: 0,
+    targetLookX: 0,
+    targetLookY: 0
+  };
+
+  let dragState = { active: false, x0: 0, y0: 0, baseX: 0, baseY: 0 };
+
+  canvas.addEventListener('pointerdown', e => {
+    dragState.active = true;
+    dragState.x0 = e.clientX;
+    dragState.y0 = e.clientY;
+    if (sunState.mode === 'gyro') {
+      dragState.baseX = camAnim.targetLookX;
+      dragState.baseY = camAnim.targetLookY;
+    } else {
+      dragState.baseX = sunState.tx;
+      dragState.baseY = sunState.ty;
+    }
+  });
+
+  addEventListener('pointermove', e => {
+    const gyroActive = sunState.mode === 'gyro' && (performance.now() - sunState.lastInputAt < 2500);
+    if (gyroActive) {
+      // When phone gyroscope controls sunlight, 1-finger drag gently looks around the 3D space!
+      if (!dragState.active) return;
+      const dx = (e.clientX - dragState.x0) / Math.max(240, innerWidth);
+      const dy = (e.clientY - dragState.y0) / Math.max(240, innerHeight);
+      camAnim.targetLookX = clamp(dragState.baseX - dx * 1.6, -1.0, 1.0);
+      camAnim.targetLookY = clamp(dragState.baseY + dy * 1.4, -1.0, 1.0);
+      return;
+    }
+
+    // Desktop mouse hover OR touch drag fallback directly steers the 3D sunlight angle!
+    if (e.pointerType === 'touch' && !dragState.active) return;
+    if (dragState.active) {
+      const dx = (e.clientX - dragState.x0) / (innerWidth * 0.44);
+      const dy = (e.clientY - dragState.y0) / (innerHeight * 0.44);
+      sunState.tx = clamp(dragState.baseX + dx, -1.0, 1.0);
+      sunState.ty = clamp(dragState.baseY + dy, -1.0, 1.0);
+    } else if (e.pointerType === 'mouse') {
+      sunState.tx = clamp((e.clientX / innerWidth) * 2.0 - 1.0, -1.0, 1.0);
+      sunState.ty = clamp((e.clientY / innerHeight) * 2.0 - 1.0, -1.0, 1.0);
+    }
+    sunState.mode = 'touch';
+    sunState.lastInputAt = performance.now();
+  });
+
+  const endDrag = () => { dragState.active = false; };
+  addEventListener('pointerup', endDrag);
+  addEventListener('pointercancel', endDrag);
+
+  // Double-tap anywhere on the canvas to toggle pure black-and-light exhibition mode
+  let lastTapAt = 0;
+  canvas.addEventListener('pointerup', e => {
+    if (Math.hypot(e.clientX - dragState.x0, e.clientY - dragState.y0) > 14) return;
+    const now = performance.now();
+    if (now - lastTapAt < 320) {
+      $('#hudBar').classList.toggle('immersed');
+    }
+    lastTapAt = now;
+  });
+
+  /* =========================================================================
+     6. GENERATIVE CATHEDRAL GLASS HARMONICA & STONE REVERB SOUNDSCAPE
+     Modulates harmonic brightness live with the solar elevation & azimuth!
+     ========================================================================= */
+  const sound = {
+    ctx: null,
+    master: null,
+    filter: null,
+    enabled: true,
+    started: false,
+    chimeTimer: null
+  };
+
+  function startCathedralAudio() {
+    if (sound.started) {
+      if (sound.ctx && sound.ctx.state === 'suspended') sound.ctx.resume();
+      return;
+    }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    try {
+      if (navigator.audioSession) navigator.audioSession.type = 'playback';
+    } catch (_) {}
+
+    const ctx = new AC();
+    sound.ctx = ctx;
+    sound.started = true;
+
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0.0001, ctx.currentTime);
+    master.gain.exponentialRampToValueAtTime(0.24, ctx.currentTime + 2.4);
+    master.connect(ctx.destination);
+    sound.master = master;
+
+    // 4.8-second procedural Gothic stone cathedral impulse reverb
+    const irLen = Math.floor(ctx.sampleRate * 4.8);
+    const irBuf = ctx.createBuffer(2, irLen, ctx.sampleRate);
+    for (let ch = 0; ch < 2; ch++) {
+      const d = irBuf.getChannelData(ch);
+      for (let i = 0; i < irLen; i++) {
+        const t = i / ctx.sampleRate;
+        const env = Math.exp(-t * 1.18) * (1.0 - Math.exp(-t * 18.0));
+        d[i] = (Math.random() * 2 - 1) * env * 0.35;
+      }
+    }
+    const convolver = ctx.createConvolver();
+    convolver.buffer = irBuf;
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 620;
+    filter.Q.value = 0.7;
+    sound.filter = filter;
+
+    const dryGain = ctx.createGain();
+    dryGain.gain.value = 0.25;
+    const wetGain = ctx.createGain();
+    wetGain.gain.value = 0.85;
+
+    filter.connect(dryGain);
+    filter.connect(convolver);
+    convolver.connect(wetGain);
+    dryGain.connect(master);
+    wetGain.connect(master);
+
+    // Warm glass-harmonica drone pad (D Lydian/Dorian open fifths: D3, A3, E4, F#4)
+    const droneFreqs = [146.83, 220.0, 329.63, 369.99];
+    droneFreqs.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const lfo = ctx.createOscillator();
+      const lfoGain = ctx.createGain();
+      const g = ctx.createGain();
+
+      osc.type = i === 0 ? 'sine' : 'triangle';
+      osc.frequency.value = freq;
+      lfo.frequency.value = 0.06 + i * 0.023;
+      lfoGain.gain.value = 0.012;
+      g.gain.value = i === 0 ? 0.055 : 0.024;
+
+      lfo.connect(lfoGain);
+      lfoGain.connect(g.gain);
+      osc.connect(g);
+      g.connect(filter);
+      osc.start();
+      lfo.start();
+    });
+
+    // Occasional crystalline glass harmonic overtones as light breathes
+    const scale = [587.33, 659.25, 739.99, 880.0, 987.77, 1174.66];
+    const scheduleChime = () => {
+      if (sound.ctx && sound.enabled && sound.ctx.state === 'running') {
+        const now = sound.ctx.currentTime;
+        const f = scale[(Math.random() * scale.length) | 0];
+        const osc = sound.ctx.createOscillator();
+        const g = sound.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(f, now);
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.exponentialRampToValueAtTime(0.026, now + 0.45);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 4.4);
+        osc.connect(g);
+        g.connect(filter);
+        osc.start(now);
+        osc.stop(now + 4.5);
+      }
+      sound.chimeTimer = setTimeout(scheduleChime, 3400 + Math.random() * 4200);
+    };
+    sound.chimeTimer = setTimeout(scheduleChime, 1800);
+  }
+
+  /* =========================================================================
+     7. UI INTERACTIONS & PUBLIC TEST HOOKS
+     ========================================================================= */
+  let toastTimer = null;
+  function showToast(msg, ms = 3200) {
+    const el = $('#toastHint');
+    el.textContent = msg;
+    el.classList.add('visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('visible'), ms);
+  }
+
+  $('#enterBtn').addEventListener('click', async () => {
+    // IMPORTANT: requestGyroPermission() MUST execute first inside click gesture for iOS Safari!
+    const gyroGranted = await requestGyroPermission();
+    startCathedralAudio();
+    $('#introVeil').classList.add('dismissed');
+    $('#hudBar').classList.add('active');
+
+    setTimeout(() => {
+      if (gyroGranted || sunState.mode === 'gyro') {
+        showToast('倾斜手机转日光 · 单指滑动环视空间');
+      } else {
+        showToast(isCoarse ? '手指滑动画面 · 转动穿过花窗的日光' : '移动或拖动鼠标 · 转动穿过花窗的日光');
+      }
+    }, 700);
+  });
+
+  $('#viewBtn').addEventListener('click', () => {
+    viewIdx = (viewIdx + 1) % VIEWS.length;
+    $('#viewBtn').textContent = VIEWS[viewIdx].name;
+    camAnim.targetLookX = 0;
+    camAnim.targetLookY = 0;
+    showToast(VIEWS[viewIdx].hint);
+  });
+
+  $('#calibBtn').addEventListener('click', async () => {
+    if (sunState.mode !== 'gyro') {
+      await requestGyroPermission();
+    }
+    sunState.R0T = sunState.lastLatestR ? matTranspose3(sunState.lastLatestR) : null;
+    sunState.tx = 0.0;
+    sunState.ty = 0.0;
+    camAnim.targetLookX = 0.0;
+    camAnim.targetLookY = 0.0;
+    showToast('已校准 · 当前握持姿态设为中心日光');
+  });
+
+  $('#audioBtn').addEventListener('click', () => {
+    if (!sound.started) startCathedralAudio();
+    sound.enabled = !sound.enabled;
+    const btn = $('#audioBtn');
+    btn.textContent = sound.enabled ? '声韵' : '静音';
+    btn.classList.toggle('muted', !sound.enabled);
+    if (sound.ctx && sound.master) {
+      const now = sound.ctx.currentTime;
+      sound.master.gain.cancelScheduledValues(now);
+      sound.master.gain.setTargetAtTime(sound.enabled ? 0.24 : 0.0001, now, 0.25);
+    }
+  });
+
+  // Clean programmatic hook for automated verification or external embedding
+  window.__setSanctuaryState = opts => {
+    if (opts.dismissIntro) {
+      $('#introVeil').classList.add('dismissed');
+      $('#hudBar').classList.add('active');
+    }
+    if (typeof opts.view === 'number') {
+      viewIdx = ((opts.view % VIEWS.length) + VIEWS.length) % VIEWS.length;
+      camAnim.pos = [...VIEWS[viewIdx].pos];
+      camAnim.tgt = [...VIEWS[viewIdx].tgt];
+      $('#viewBtn').textContent = VIEWS[viewIdx].name;
+    }
+    if (typeof opts.tx === 'number') {
+      sunState.tx = sunState.x = clamp(opts.tx, -1, 1);
+      sunState.mode = 'touch';
+      sunState.lastInputAt = performance.now();
+    }
+    if (typeof opts.ty === 'number') {
+      sunState.ty = sunState.y = clamp(opts.ty, -1, 1);
+      sunState.mode = 'touch';
+      sunState.lastInputAt = performance.now();
+    }
+  };
+
+  /* =========================================================================
+     8. MAIN 60/120HZ RENDER LOOP
+     ========================================================================= */
+  const vec3 = {
+    sub: (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]],
+    add: (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]],
+    scale: (a, s) => [a[0] * s, a[1] * s, a[2] * s],
+    cross: (a, b) => [
+      a[1] * b[2] - a[2] * b[1],
+      a[2] * b[0] - a[0] * b[2],
+      a[0] * b[1] - a[1] * b[0]
+    ],
+    norm: a => {
+      const l = Math.hypot(a[0], a[1], a[2]) || 1;
+      return [a[0] / l, a[1] / l, a[2] / l];
+    }
+  };
+
+  let prevNow = performance.now();
+  const startNow = prevNow;
+  let hudStamp = 0;
+  let perfTimeAcc = 0, perfFrames = 0, lastDownscaleAt = 0;
+
+  function renderFrame(now) {
+    const dt = Math.min(0.08, Math.max(0.001, (now - prevNow) / 1000));
+    prevNow = now;
+    const elapsed = (now - startNow) / 1000;
+
+    // Gentle poetic sun drift before user tilts or after 8s idle without gyroscope
+    if (sunState.mode !== 'gyro' && (now - sunState.lastInputAt > 8000)) {
+      sunState.tx = Math.sin(elapsed * 0.13) * 0.58;
+      sunState.ty = Math.sin(elapsed * 0.089 + 0.9) * 0.46;
+      sunState.mode = 'drift';
+    }
+
+    // Critically damped smoothing for silky 120Hz gyroscope light motion
+    const smoothRate = sunState.mode === 'gyro' ? 8.5 : 4.2;
+    const alpha = 1.0 - Math.exp(-dt * smoothRate);
+    sunState.x += (sunState.tx - sunState.x) * alpha;
+    sunState.y += (sunState.ty - sunState.y) * alpha;
+
+    // Smooth C-infinity monotonic azimuth [-64°, +28°] centered at -32° (hero corner composition)
+    const azDeg = -32.0 + 46.0 * sunState.x + 14.0 * sunState.x * sunState.x;
+    const elDeg = clamp(24.0 - sunState.y * 22.0, 9.0, 54.0);
+    const az = azDeg * D2R;
+    const el = elDeg * D2R;
+
+    const sunVec = [
+      Math.cos(el) * Math.cos(az),
+      Math.sin(el),
+      Math.cos(el) * Math.sin(az)
+    ];
+
+    // Solar color temperature shifts naturally: low sun = warm vespers gold/amber, high sun = pure crystal daylight
+    const highness = clamp((elDeg - 9.0) / 38.0, 0.0, 1.0);
+    const sunColor = [
+      1.0,
+      0.76 + 0.21 * highness,
+      0.54 + 0.40 * highness
+    ];
+
+    // Modulate cathedral soundscape brightness smoothly with sunlight elevation
+    if (sound.filter && sound.ctx && sound.enabled) {
+      sound.filter.frequency.setTargetAtTime(340 + highness * 880 + Math.abs(sunState.x) * 220, sound.ctx.currentTime, 0.15);
+    }
+
+    // Smooth camera preset interpolation + handheld micro-parallax + touch free-look
+    const targetView = VIEWS[viewIdx];
+    const camLerp = 1.0 - Math.exp(-dt * 3.2);
+    for (let k = 0; k < 3; k++) {
+      camAnim.pos[k] = lerp(camAnim.pos[k], targetView.pos[k], camLerp);
+      camAnim.tgt[k] = lerp(camAnim.tgt[k], targetView.tgt[k], camLerp);
+    }
+    camAnim.lookX = lerp(camAnim.lookX, camAnim.targetLookX, 1.0 - Math.exp(-dt * 6.0));
+    camAnim.lookY = lerp(camAnim.lookY, camAnim.targetLookY, 1.0 - Math.exp(-dt * 6.0));
+
+    let fw = vec3.norm(vec3.sub(camAnim.tgt, camAnim.pos));
+    let rt = vec3.norm(vec3.cross([0, 1, 0], fw));
+    let up = vec3.cross(fw, rt);
+
+    // Subtle binocular parallax on device tilt gives vivid naked-eye 3D depth on mobile!
+    const ro = vec3.add(
+      camAnim.pos,
+      vec3.add(vec3.scale(rt, sunState.x * 0.18), vec3.scale(up, -sunState.y * 0.09))
+    );
+    const lookTarget = vec3.add(
+      camAnim.tgt,
+      vec3.add(vec3.scale(rt, camAnim.lookX * 2.8), vec3.scale(up, camAnim.lookY * 2.1))
+    );
+    fw = vec3.norm(vec3.sub(lookTarget, ro));
+    rt = vec3.norm(vec3.cross([0, 1, 0], fw));
+    up = vec3.cross(fw, rt);
+
+    const w = canvas.width, h = canvas.height;
+    const aspect = w / h;
+    const focal = aspect >= 1.0 ? 0.88 : clamp(0.52 / aspect, 0.86, 1.02);
+
+    gl.viewport(0, 0, w, h);
+    gl.disable(gl.BLEND);
+
+    // Pass 1: Raytraced Pure-Light Architecture + Volumetric Tyndall Scattering
+    gl.useProgram(sceneProg.prog);
+    const U = sceneProg.u;
+    gl.uniform2f(U.uRes, w, h);
+    gl.uniform3fv(U.uRo, ro);
+    gl.uniform3fv(U.uRt, rt);
+    gl.uniform3fv(U.uUp, up);
+    gl.uniform3fv(U.uFw, fw);
+    gl.uniform1f(U.uFocal, focal);
+    gl.uniform1f(U.uExpo, 1.24);
+    gl.uniform3fv(U.uSun, sunVec);
+    gl.uniform3fv(U.uSunCol, sunColor);
+    gl.uniform1f(U.uTime, elapsed);
+    gl.uniform1i(U.uSteps, marchSteps);
+    gl.uniform1i(U.uNoise, 0);
+    gl.uniform1i(U.uGlass, 1);
+    gl.uniform1i(U.uWave, 2);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf);
+    gl.enableVertexAttribArray(sceneProg.aPos);
+    gl.vertexAttribPointer(sceneProg.aPos, 2, gl.FLOAT, false, 0, 0);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.disableVertexAttribArray(sceneProg.aPos);
+
+    // Pass 2: 2,200 Additive Bokeh Dust Motes Illuminated Strictly Inside the Rays
+    gl.useProgram(dustProg.prog);
+    const V = dustProg.u;
+    gl.uniform2f(V.uRes, w, h);
+    gl.uniform3fv(V.uRo, ro);
+    gl.uniform3fv(V.uRt, rt);
+    gl.uniform3fv(V.uUp, up);
+    gl.uniform3fv(V.uFw, fw);
+    gl.uniform1f(V.uFocal, focal);
+    gl.uniform3fv(V.uSun, sunVec);
+    gl.uniform3fv(V.uSunCol, sunColor);
+    gl.uniform1f(V.uTime, elapsed);
+    gl.uniform1i(V.uGlass, 1);
+    gl.uniform1i(V.uWave, 2);
+
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE);
+    gl.bindBuffer(gl.ARRAY_BUFFER, dustBuf);
+    gl.enableVertexAttribArray(dustProg.aSeed);
+    gl.vertexAttribPointer(dustProg.aSeed, 4, gl.FLOAT, false, 0, 0);
+    gl.drawArrays(gl.POINTS, 0, DUST_COUNT);
+    gl.disableVertexAttribArray(dustProg.aSeed);
+
+    // Dynamic frame-rate governor for locked smoothness across phones & desktops
+    perfTimeAcc += dt;
+    perfFrames++;
+    if (perfFrames >= 42) {
+      const avgDt = perfTimeAcc / perfFrames;
+      perfTimeAcc = 0;
+      perfFrames = 0;
+      if (avgDt > 1 / 46 && (renderScale > 0.48 || marchSteps > 34)) {
+        if (renderScale > 0.52) renderScale *= 0.87;
+        else marchSteps = Math.max(34, marchSteps - 6);
+        lastDownscaleAt = now;
+        resizeCanvas();
+      } else if (avgDt < 1 / 95 && (now - lastDownscaleAt > 5500) && renderScale < maxRenderScale) {
+        renderScale = Math.min(maxRenderScale, renderScale * 1.07);
+        resizeCanvas();
+      }
+    }
+
+    // Update Astrolabe Sundial & Telemetry Readout (~12Hz DOM update)
+    if (now - hudStamp > 80) {
+      hudStamp = now;
+      const azInt = Math.round(azDeg);
+      const elInt = Math.round(elDeg);
+      $('#angleReadout').textContent = `方位 ${azInt > 0 ? '+' : ''}${azInt}° · 仰角 ${elInt}°`;
+      $('#sensorState').textContent = sunState.mode === 'gyro'
+        ? 'Gyro · 陀螺仪控光'
+        : sunState.mode === 'touch'
+          ? (isCoarse ? 'Touch · 触控控光' : 'Pointer · 鼠标控光')
+          : 'Drift · 日晷流转';
+
+      const orbX = (22 + sunState.x * 14.5).toFixed(2);
+      const orbY = (22 + sunState.y * 14.5).toFixed(2);
+      $('#sunOrb').setAttribute('cx', orbX);
+      $('#sunOrb').setAttribute('cy', orbY);
+      $('#sunRayLine').setAttribute('x2', orbX);
+      $('#sunRayLine').setAttribute('y2', orbY);
+    }
+
+    requestAnimationFrame(renderFrame);
+  }
+
+  requestAnimationFrame(renderFrame);
+  canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); location.reload(); });
+})();
+</script>
+</body>
+</html>
